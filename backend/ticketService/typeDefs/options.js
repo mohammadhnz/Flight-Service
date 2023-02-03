@@ -2,7 +2,7 @@
 
 const options = {
     keepCase: true, // important to use true
-    longs: String,
+    longs: Number,
     enums: String,
     defaults: false,
     oneofs: true

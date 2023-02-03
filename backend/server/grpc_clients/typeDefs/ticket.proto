@@ -64,13 +64,13 @@ message Ticket {
     string origin = 2;
     string destination = 3;
     Duration duration = 4;
-    uint32 y_price = 5;
-    uint32 j_price = 6;
-    uint32 f_price = 7;
-    uint32 y_class_free_capacity = 8;
-    uint32 j_class_free_capacity = 9;
-    uint32 f_class_free_capacity = 10;
-    string equipment = 11;
+    uint32 price = 5;
+    uint32 free_capacity = 6;
+    bool is_limited_capacity = 7;
+    string equipment = 8;
+    uint64 departure_local_time = 9;
+    uint64 arrival_local_time = 10;
+    string class_name = 11;
 }
 
 message Duration {

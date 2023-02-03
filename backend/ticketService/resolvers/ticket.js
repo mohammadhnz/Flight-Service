@@ -14,11 +14,11 @@ function buildQuery({ origin, destination, departure_time , return_time , number
         sql += ' and destination = $' + params.length.toString();
     }
     if(departure_time){
-        params.push(new Date(departure_time).toISOString());
+        params.push(new Date(parseInt(departure_time)).toISOString());
         sql += ' and date_trunc(\'day\', departure_local_time) = date_trunc(\'day\', cast($'+params.length.toString()+' as timestamp))';
     }
     if(return_time){
-        params.push(new Date(return_time).toISOString());
+        params.push(new Date(parseInt(return_time)).toISOString());
         sql += ' and date_trunc(\'day\', arrival_local_time) = date_trunc(\'day\', cast($'+params.length.toString()+' as timestamp))';
     }
     if(number_of_passengers){
@@ -35,13 +35,38 @@ function buildQuery({ origin, destination, departure_time , return_time , number
     };
 }
 
+function splitTickets(request, row) {
+    const results = [];
+    const flight_classes = ['y', 'j', 'f'];
+    const class_names = {'y': "Business", 'j': "Economy", 'f': "First Class"};
+    for(const c of Object.values(flight_classes)) {
+        if(row[c+'_class_free_capacity'] < request.number_of_passengers){
+            continue;
+        }
+        results.push({
+            flight_id: row.flight_id,
+            origin: row.origin,
+            destination: row.destination,
+            duration: row.duration,
+            equipment: row.equipment,
+            class_name: class_names[c], 
+            price: row[c+'_price'], 
+            free_capacity: row[c+'_class_free_capacity'], 
+            is_limited_capacity: (row[c+'_class_free_capacity'] <= 3 * request.number_of_passengers), 
+            departure_local_time: row.departure_local_time.getTime(),
+            arrival_local_time: row.arrival_local_time.getTime(),
+        });
+    }
+    return results;
+}
 
 const searchTickets = async ({request}, callback) => {
     try {
         const query = buildQuery(request);
         const { rows } = await db.query(query);
+        const result = rows.reduce((re, r) => re.concat(splitTickets(request, r)), [])
         if (rows.length !== 0) {
-            callback(null, { list: rows }); 
+            callback(null, { list: result}); 
         }
         else {
             callback({

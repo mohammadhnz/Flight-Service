@@ -5,9 +5,11 @@ const chalk = require("chalk");
 const app = express();
 
 const ticketRoutes = require("./ticketRoutes");
+const authHandler = require("./authHandler");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(authHandler);
 
 app.use("/", ticketRoutes);
 

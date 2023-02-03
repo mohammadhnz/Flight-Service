@@ -2,31 +2,31 @@ const grpc = require('grpc');
 const db = require('../data-access/db');
 const { GetProduct, } = require("../classes/Ticket");
 
-const getTickets = async (_, callback) => {
-    const sql = 'SELECT * FROM available offers';
+const searchTickets = async (_, callback) => {
+    console.log('resq');
+    const sql = 'SELECT * FROM available_offers';
     const query = {
         text: sql,
     };
 
     try {
+        console.log('resq12');
         const { rows } = await db.query(query);
-
+        console.log('resq1');
+        console.log(rows);
         if (rows.length !== 0) {
-            /*console.log("\n[GET] Products\n");
-            const products = rows.map(product => {
-                const { id, ...rest } = product;
-                return new GetProduct(id, rest);
-            });
-            console.log(products);*/
+            console.log('resq2');
             callback(null, { list: rows }); 
         }
         else {
+            console.log('resq3');
             callback({
                 code: grpc.status.NOT_FOUND,
                 details: "Not Found"
             })
         }
     } catch(e) {
+        console.log('res3q');
         console.log(e);
         callback(e);
     }
@@ -42,7 +42,7 @@ const getNews = async (_, callback) => {
 };
 
 module.exports = {
-    getTickets,
+    searchTickets,
     getNews,
 };
 

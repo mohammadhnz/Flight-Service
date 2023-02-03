@@ -1,7 +1,7 @@
 package models
 
 type User struct {
-	user_id       int64
+	User_id       int64 `gorm:"autoIncrement"`
 	Email         string
 	Phone_number  string
 	Gender        string

@@ -1,53 +1,37 @@
 import {useForm, Controller} from "react-hook-form"
+import {useState} from "react";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 import Button from '@material-ui/core/Button';
-import {Autocomplete, FormControlLabel, IconButton, Radio, RadioGroup, TextField} from "@mui/material";
+import {FormControlLabel, Radio, RadioGroup} from "@mui/material";
 import {makeStyles} from "@material-ui/core/styles";
-import countryNames from "../../static/countries.json";
-import React, {useState, useEffect} from 'react';
 
+const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
+        width: '25ch',
+    },
+}));
 
 function Ticket() {
     const {register, handleSubmit, control, formState: {errors}} = useForm({mode: "onBlur",});
-    const [submittedDep, setLeftDate] = useState();
-    const [submittedRet, setReturnDate] = useState();
+    const [submittedDate, setSubmittedDate] = useState();
     const [ratioVal, setRatioVal] = useState('around');
-    const options = countryNames;
-    const [passNum, setPassNum] = useState(0);
-    const defaultProps = {
-        options: options,
-        getOptionLabel: (option) => option.name,
-    };
-    const upPassNum = (event) => {
-        if (!/[0-9]/.test(event.key)) {
-            event.preventDefault();
-            setPassNum(prevCount => parseInt(prevCount) + 1);
-        }
-    };
+    const classes = useStyles();
 
-    const downPassNum = (event) => {
-        if (!/[0-9]/.test(event.key)) {
-            event.preventDefault();
-            setPassNum(prevCount => parseInt(prevCount) - 1);
-        }
-    };
 
-    const handlePasNumChange = (event) => {
-        if (!/[0-9]/.test(event.key)) {
-            event.preventDefault();
-            setPassNum(event.target.value)
-        }
-    }
     const handleRatioChange = (event) => {
         setRatioVal(event.target.value);
     };
 
-    function onSubmitButton(data, {retDate, leftDate}) {
-        setLeftDate(leftDate);
-        setReturnDate(retDate);
-        data.passNum = passNum;
+    function onSubmitButton(data, {date}) {
+        setSubmittedDate(date);
         console.log(data)
     }
 
@@ -56,26 +40,41 @@ function Ticket() {
             <form className="data-form classes.root" onSubmit={handleSubmit(onSubmitButton)}>
                 <label htmlFor="from-field">
                     از
-                    <Autocomplete
-                        {...defaultProps}
-                        autoHighlight
-                        renderInput={(params) => (
-                            <TextField {...params} {...register("from")} placeholder="from" id="from-field"
-                                       variant="standard"/>
-                        )}
+                    <input
+                        {...register("from")}
+                        type="text"
+                        placeholder="from"
+                        id="from-field"
                     />
                 </label>
+
                 <label htmlFor="to-field">
                     به
-                    <Autocomplete
-                        {...defaultProps}
-                        autoHighlight
-                        renderInput={(params) => (
-                            <TextField {...params} {...register("to")} placeholder="to" id="to-field"
-                                       variant="standard"/>
-                        )}
+                    <input
+                        {...register("to")}
+                        type="text"
+                        placeholder="to"
+                        id="to-field"
                     />
                 </label>
+                {/*<label htmlFor="field-oneway">*/}
+                {/*    <input*/}
+                {/*        {...register("return-status")}*/}
+                {/*        type="radio"*/}
+                {/*        value="oneway"*/}
+                {/*        id="field-oneway"*/}
+                {/*    />*/}
+                {/*    یک طرفه*/}
+                {/*</label>*/}
+                {/*<label htmlFor="field-around">*/}
+                {/*    <input*/}
+                {/*        {...register("return-status")}*/}
+                {/*        type="radio"*/}
+                {/*        value="around"*/}
+                {/*        id="field-around"*/}
+                {/*    />*/}
+                {/*    رفت و برگشت*/}
+                {/*</label>*/}
 
                 <RadioGroup row aria-label="way" name="way" value={ratioVal} onChange={handleRatioChange}>
                     <FormControlLabel value="around" control={<Radio id="field-around" {...register("return-status")}/>}
@@ -86,7 +85,7 @@ function Ticket() {
 
                 <Controller
                     control={control}
-                    name="retDate"
+                    name="date"
                     rules={{required: true}} //optional
                     render={({
                                  field: {onChange, name, value},
@@ -103,10 +102,6 @@ function Ticket() {
                                 locale={persian_fa}
                                 calendarPosition="bottom-right"
                                 format={"YYYY/MM/DD"}
-
-                                containerStyle={{
-                                    marginLeft: '1.5rem'
-                                }}
                             />
                             {errors && errors[name] && errors[name].type === "required" && (
                                 //if you want to show an error message
@@ -117,7 +112,7 @@ function Ticket() {
                 />
                 <Controller
                     control={control}
-                    name="leftDate"
+                    name="date"
                     rules={{required: true}} //optional
                     render={({
                                  field: {onChange, name, value},
@@ -142,15 +137,6 @@ function Ticket() {
                         </>
                     )}
                 />
-                <div>
-                    <label htmlFor="passNum">تعداد مسافران</label>
-                    <div style={{display: 'inline-block'}}>
-                        <IconButton aria-label="plus" size="large" onClick={upPassNum}>+</IconButton>
-                        <input style={{width: '25ch',}} variant="standard" {...register("passNum", {required: true})} value={passNum}
-                               onChange={handlePasNumChange}/>
-                        <IconButton aria-label="plus" size="large" onClick={downPassNum}>-</IconButton>
-                    </div>
-                </div>
                 <br/>
                 <Button variant="outlined" type="submit" className="btn btn-primary">
                     Send
@@ -159,6 +145,5 @@ function Ticket() {
         </>
     )
 }
-
 
 export default Ticket;

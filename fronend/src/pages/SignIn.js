@@ -28,7 +28,7 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-export default function Test() {
+export default function SignIn() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -63,8 +63,8 @@ export default function Test() {
               fullWidth
               id="email"
               label="آدرس ایمیل"
-              name="email"
-              autoComplete="email"
+              // name="email"
+              // autoComplete="email"
               autoFocus
             />
             <TextField

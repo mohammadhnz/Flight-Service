@@ -1,8 +1,15 @@
 package models
 
-import "gorm.io/gorm"
-
 type User struct {
-	gorm.Model
-	Id int
+	user_id       int64
+	Email         string
+	Phone_number  string
+	Gender        string
+	First_name    string
+	Last_name     string
+	Password_hash string
+}
+
+func (User) TableName() string {
+	return "user_account"
 }

@@ -3,13 +3,14 @@ package config
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 )
 
 var DB *gorm.DB
 
 func Connect() {
 	db, err := gorm.Open(
-		postgres.Open("postgres://postgres:postgres@localhost:8081/postgres"),
+		postgres.Open(os.Getenv("DB")),
 		&gorm.Config{},
 	)
 	if err != nil {

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"awesomeProject/config"
+	"awesomeProject/middleware"
 	"awesomeProject/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -103,7 +104,26 @@ func SignIn(c *gin.Context) {
 }
 
 func SignOut(c *gin.Context) {
-	c.String(200, "Hello world")
+	claims, user := middleware.DecodeJwtToken(c)
+	token, _ := c.Cookie("Authorization")
+	if expiration_time, ok := claims["exp"].(float64); ok {
+		unauthorizedToken := models.UnauthorizedToken{
+			User_id:    user.User_id,
+			Token:      token,
+			Expiration: time.Unix(int64(expiration_time), 0),
+		}
+		result := config.DB.Create(&unauthorizedToken)
+		if result.Error != nil {
+			c.JSON(http.StatusConflict, gin.H{
+				"error": "Failed to create",
+			})
+			return
+		}
+		c.JSON(http.StatusCreated, gin.H{
+			"ok": "Logged out",
+		})
+	}
+
 }
 
 func UserInfo(c *gin.Context) {
@@ -111,6 +131,7 @@ func UserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"object": user,
 	})
+
 }
 
 func All(c *gin.Context) {

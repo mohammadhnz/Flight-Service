@@ -176,7 +176,7 @@ function getPurchaseTitle(flight) {
 function makeTransaction(amount, receipt_id) {
     const tracking_code = uuid();
     return new Promise(function (resolve, reject) {
-      request.post('http://bank:8999/transaction/', { 
+      request.post('http://bank:8080/transaction/', { 
         json: { 
             amount,
             receipt_id,
@@ -201,7 +201,7 @@ async function getTicketData(row) {
             name: row.first_name,
             family: row.last_name,
         }],
-        payment_url: row.transaction_result === 1 ? undefined : "http://localhost:8999/payment/" + row.transaction_id + "/",
+        payment_url: row.transaction_result === 1 ? undefined : "http://localhost:8080/payment/" + row.transaction_id + "/",
     };
 }
 

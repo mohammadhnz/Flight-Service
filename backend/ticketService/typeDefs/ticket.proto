@@ -4,15 +4,15 @@ service TicketService {
     rpc suggestOriginDestination(Name) returns (OriginDestinationList) {}
     rpc getNews(Empty) returns (NewsList) {}
     rpc searchFlights(SearchParams) returns (FlightList) {}
-    rpc buyTicket(TicketForm) returns (Ticket) {}
-    rpc parchase(TicketId) returns (Ticket) {}
+    rpc createTicket(TicketForm) returns (Ticket) {}
+    rpc parchase(TransactionParams) returns (Ticket) {}
     rpc getUsersTickets(UserId) returns (TicketList) {}
 }
 
 message Empty {}
 
 message UserId {
-    string userId = 1;
+    string user_id = 1;
 }
 
 message TicketForm {
@@ -22,8 +22,10 @@ message TicketForm {
     repeated Passenger passengers = 4;
 }
 
-message TicketId {
-    string ticket_id = 1;
+message TransactionParams {
+    string user_id = 1;
+    string tracking_code = 2;
+    string status = 3;
 }
 
 message OriginDestinationList {
@@ -83,9 +85,10 @@ message Duration {
 }
 
 message Ticket {
-    uint32 id = 1;
+    uint32 transaction_id = 1;
     Flight flight = 2;
     repeated Passenger passengers = 3;
+    string payment_url = 4;
 }
 
 message Passenger {

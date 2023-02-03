@@ -1,6 +1,7 @@
 const grpc = require('grpc');
 const db = require('../data-access/db');
-var request = require('request');
+const request = require('request');
+const uuid = require('uuid').v4;
 
 function buildQuery({ origin, destination, departure_time , return_time , number_of_passengers}) {
     let params = [];
@@ -28,7 +29,6 @@ function buildQuery({ origin, destination, departure_time , return_time , number
         sql += ' or f_class_free_capacity > $' + params.length.toString() + ')';
     }
     sql += ' limit 30';
-    console.log(sql, params);
     return {
         text: sql,
         values: params,
@@ -59,8 +59,15 @@ async function getFlightData(flight_id, class_name, number_of_passengers) {
     if (rows.length === 0){
         return null;
     }
-    console.log(rows[0],class_name,  number_of_passengers);
     return getFlightClassData(rows[0], class_name, number_of_passengers);
+}
+
+async function getFlightDataWithSerial(flight_serial, class_name) {
+    const { rows } = await db.query({text: "SELECT * FROM flight where flight_serial = $1", values: [flight_serial]});
+    if (rows.length === 0){
+        return null;
+    }
+    return getFlightData(rows[0].flight_id, class_name, 1);
 }
 
 
@@ -144,10 +151,55 @@ function getPurchaseTitle(flight) {
     return "پرداخت هزینه برای پرواز شماره "+flight.flight_serial+", هزینه: "+flight.price;
 }
 
-const buyTicket = async ({request}, callback) => {
+function makeTransaction(amount, receipt_id) {
+    const tracking_code = uuid();
+    return new Promise(function (resolve, reject) {
+      request.post('http://localhost:8999/transaction/', { 
+        json: { 
+            amount,
+            receipt_id,
+            callback: 'http://localhost:8081/payment/callback/' + tracking_code
+        }
+    }, function (error, res, body) {
+        if (!error && res.statusCode === 201) {
+          resolve({...body, tracking_code});
+        } else {
+          reject(error);
+        }
+      });
+    });
+}
+
+async function getTicketData(row) {
+    const flight = await getFlightDataWithSerial(row.flight_serial, row.offer_class);
+    return {
+        transaction_id: row.transaction_id, 
+        flight, 
+        passengers: [{
+            name: row.first_name,
+            family: row.last_name,
+        }],
+        payment_url: row.transaction_result === 1 ? undefined : "http://localhost:8999/payment/" + row.transaction_id + "/",
+    };
+}
+
+async function getTicket(user_id, tracking_code) {
+    const query = {
+        text: 'select * from purchase where (corresponding_user_id = $1 and tracking_code = $2)',
+        values: [
+            user_id,
+            tracking_code, 
+        ],
+    };
+    const {rows} = await db.query(query);
+    if(rows.length===0){
+        return null;
+    }
+    return getTicketData(rows[0]);
+}
+
+const createTicket = async ({request: {user_id, flight_id, class_name, passengers}}, callback) => {
     try {
-        const {user_id, flight_id, class_name, passengers} = request;
-        console.log(request);
         const flight = await getFlightData(flight_id, class_name, passengers.length);
         if (flight === null){
             return callback({
@@ -155,9 +207,9 @@ const buyTicket = async ({request}, callback) => {
                 details: "Not Found"
             });
         }
-        console.log("AJAABB", flight);
         const flight_serial = await getFlightSerial(flight.flight_id);
-        console.log("DDDE", flight_serial);
+
+        const {id: transaction_id, tracking_code} = await makeTransaction(flight.price, flight_serial);
         const query = {
             text: 'insert into purchase ('
                 + 'corresponding_user_id,'
@@ -166,8 +218,10 @@ const buyTicket = async ({request}, callback) => {
                 + 'last_name,'
                 + 'flight_serial,'
                 + 'offer_price,'
-                + 'offer_class'
-            + ') values ($1, $2, $3, $4, $5, $6, $7) RETURNING transaction_id',
+                + 'offer_class,'
+                + 'transaction_id,'
+                + 'tracking_code'
+            + ') values ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
             values: [
                 user_id,
                 getPurchaseTitle(flight), 
@@ -176,12 +230,67 @@ const buyTicket = async ({request}, callback) => {
                 flight_serial, 
                 flight.price, 
                 flight.class_name,
+                transaction_id,
+                tracking_code,
             ],
         };
-        const {rowCount, rows} = await db.query(query);
-        console.log(rowCount, rows);
+        const {rowCount} = await db.query(query);
         if (rowCount === 1) {
-            callback(null, {id: rows[0].transaction_id, flight: flight, passengers: [passengers[0]]}); 
+            callback(null, await getTicket(user_id, tracking_code)); 
+        }
+        else {
+            callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            })
+        }
+    } catch(e) {
+        console.log(e);
+        callback(e);
+    }
+};
+
+
+const parchase = async ({request: {user_id, tracking_code, status}}, callback) => {
+    try {
+        const query = {
+            text: 'update purchase set transaction_result = $1 where (corresponding_user_id = $2 and tracking_code = $3)',
+            values: [
+                status,
+                user_id,
+                tracking_code, 
+            ],
+        };
+        const {rowCount} = await db.query(query);
+        if (rowCount === 1) {
+            callback(null, await getTicket(user_id, tracking_code)); 
+        }
+        else {
+            callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            })
+        }
+    } catch(e) {
+        console.log(e);
+        callback(e);
+    }
+};
+
+
+const getUsersTickets = async ({request: {user_id}}, callback) => {
+    try {
+        const query = {
+            text: 'select * from purchase where corresponding_user_id = $1',
+            values: [user_id],
+        };
+        const {rows} = await db.query(query);
+        if (rows.length !== 0) {
+            const list = [];
+            for(const r of rows){
+                list.push(await getTicketData(r));
+            }
+            callback(null, {list}); 
         }
         else {
             callback({
@@ -199,7 +308,9 @@ module.exports = {
     searchFlights,
     getNews,
     suggestOriginDestination,
-    buyTicket,
+    createTicket,
+    parchase,
+    getUsersTickets,
 };
 
 /*
@@ -224,177 +335,4 @@ module.exports = {
 //     DATA_LOSS: 15,
 //     UNAUTHENTICATED: 16
 // }
-
-const create = async ({ request }, callback) => {
-    const id = require('crypto').randomBytes(10).toString('hex');
-    const sql = "INSERT INTO products(id, price_in_cents, title, description, discount.pct, discount.value_in_cents) VALUES($1, $2, $3, $4, $5, $6)";
-
-    const { price_in_cents, title, description, pct } = request;
-    const value_in_cents = Math.ceil(price_in_cents * pct); // Type match for int
-    const query = {
-        text: sql,
-        values: [id, price_in_cents, title, description, pct, value_in_cents],
-    };
-
-    console.log(request);
-
-    try {
-        const { rowCount } = await db.query(query);
-
-        if (rowCount === 1){
-            console.log(`Create ${rowCount} product with id(${id}).`);
-            callback(null, {
-                id,
-                price_in_cents,
-                title,
-                description,
-                discount: {
-                    pct,
-                    value_in_cents,
-                }
-            });
-        } else {
-            callback({
-                code: grpc.status.CANCELLED,
-                details: "CANCELLED",
-            })
-
-            // This goes to catch part
-            // callback({
-            //     code: grpc.status.ALREADY_EXISTS,
-            //     details: "ALREADY EXISTS",
-            // })
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const update = async ({ request }, callback) => {
-    const { id, price_in_cents, title, description, pct } = request;
-    const sql = "UPDATE products SET price_in_cents = $1, title = $2, description = $3, discount.pct = $4, discount.value_in_cents = $5 WHERE id = $6"
-
-    const value_in_cents = Math.ceil(price_in_cents * pct);
-
-    const query = {
-        text: sql,
-        values: [price_in_cents, title, description, pct, value_in_cents, id],
-    };
-
-    try {
-        const { rowCount } = await db.query(query);
-
-        if (rowCount === 1) {
-            console.log(`Update ${rowCount} product with id(${id}).`);
-            callback(null, {
-                id,
-                price_in_cents,
-                title,
-                description,
-                discount: {
-                    pct,
-                    value_in_cents,
-                }
-            });
-        } else {
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            });
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const getProduct = async ({ request }, callback) => {
-    const { id } = request;
-
-    const sql = 'SELECT * FROM products WHERE id = $1';
-    const query = {
-        text: sql,
-        values: [id],
-    };
-
-    try {
-        const { rows } = await db.query(query);
-
-        if (rows.length !== 0) {
-            console.log("\n[GET] Product\n")
-            const product = rows[0]
-            console.log(product)
-            const payload = new GetProduct(id, product);
-
-            callback(null, payload );
-        }
-        else {
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            })
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const deleteProduct = async ({ request }, callback) => {
-    const { id } = request;
-    const sql = 'DELETE FROM products WHERE id = $1';
-    const query = {
-        text: sql,
-        values: [id],
-    };
-
-    try {
-        const { rowCount } = await db.query(query);
-        if (rowCount === 1) {
-            console.log(`Remove ${rowCount} product with id(${id}).`);
-            callback(null, {});
-        } else {
-            console.log(`There is no product with id(${id}) in database.`);
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            });
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const deleteProducts = async (_, callback) => {
-    const sql = 'DELETE FROM products';
-    const query = {
-        text: sql,
-    };
-
-    try {
-        const { rowCount } = await db.query(query);
-        if (rowCount === 0) {
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            })
-        } else {
-            console.log(`Remove ${rowCount} products`);
-            callback(null, {})
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-module.exports = {
-    getProducts,
-    getProduct,
-    create,
-    update,
-    deleteProduct,
-    deleteProducts,
-}*/
+*/

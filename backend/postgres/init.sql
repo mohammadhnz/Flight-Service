@@ -140,6 +140,7 @@ CREATE INDEX ON flight (origin, destination, departure_utc);
 
 CREATE TABLE purchase
 (
+    tracking_code VARCHAR PRIMARY KEY,
     corresponding_user_id INTEGER,
     title VARCHAR,
     first_name VARCHAR,
@@ -147,7 +148,7 @@ CREATE TABLE purchase
     flight_serial INTEGER REFERENCES flight ON DELETE RESTRICT ON UPDATE RESTRICT,
     offer_price INTEGER,
     offer_class VARCHAR,
-    transaction_id SERIAL PRIMARY KEY,
+    transaction_id INTEGER,
     transaction_result INTEGER
 );
 

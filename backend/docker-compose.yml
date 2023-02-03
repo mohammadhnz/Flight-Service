@@ -24,6 +24,6 @@ services:
       context: ./bankService
       dockerfile: Dockerfile
     ports:
-      - "8080:8999"
+      - "8999:8080"
     depends_on:
       - postgres

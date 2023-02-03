@@ -57,7 +57,6 @@ func SignUp(c *gin.Context) {
 }
 
 func SignIn(c *gin.Context) {
-	//validate user data
 	var body struct {
 		Email        string
 		Phone_number string
@@ -75,7 +74,6 @@ func SignIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "no user with given information"})
 	}
 
-	//validate password
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password_hash), []byte(body.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -98,9 +96,10 @@ func SignIn(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"token": tokenString,
-	})
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func SignOut(c *gin.Context) {
@@ -108,11 +107,15 @@ func SignOut(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	c.String(200, "Hello world")
+	user, _ := c.Get("user")
+	c.JSON(http.StatusOK, gin.H{
+		"object": user,
+	})
 }
 
 func All(c *gin.Context) {
-	users := []models.User{}
-	config.DB.Find(&users)
-	c.JSON(200, &users)
+	user, _ := c.Get("user")
+	c.JSON(http.StatusOK, gin.H{
+		"object": user,
+	})
 }

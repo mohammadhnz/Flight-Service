@@ -3,16 +3,16 @@ version: '3.8'
 services:
   redis:
     image: redis:6.2-alpine
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
 
   postgres:
     build:
       context: ./postgres
       dockerfile: Dockerfile
     command: postgres
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
       - TZ=Asia/Tehran
       - POSTGRES_HOST_AUTH_METHOD=trust
@@ -25,5 +25,31 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8999:8080"
+
+  ticket:
+    build:
+      context: ./ticketService
+      dockerfile: Dockerfile
+    expose:
+      - "50050"
     depends_on:
       - postgres
+      - bank
+    links:
+      - postgres
+      - bank
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - ticket
+      - bank
+    links:
+      - postgres
+      - bank
+      - ticket

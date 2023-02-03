@@ -5,14 +5,14 @@ const client = new Client({
     database: 'project1',
     password:'password1',
     port: 5432,
-    host: 'localhost',
+    host: 'postgres',
     ssl: false
 });
 
 client.connect();
 client.on('error', (e)=>{
     console.log(e);
-})
+});
 
 module.exports = {
     query: ({text, values}, callback) => {

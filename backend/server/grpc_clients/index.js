@@ -14,8 +14,8 @@ const authProto = grpc.loadPackageDefinition(authDefinition);
 const TicketService = ticketProto.TicketService;
 const AuthService = authProto.AuthService;
 
-const ticket_grpc = new TicketService('localhost:50050', grpc.credentials.createInsecure());
-const auth_grpc = new AuthService('localhost:50051', grpc.credentials.createInsecure());
+const ticket_grpc = new TicketService('ticket:50050', grpc.credentials.createInsecure());
+const auth_grpc = null; // new AuthService('auth:50051', grpc.credentials.createInsecure());
 
 
 module.exports = {

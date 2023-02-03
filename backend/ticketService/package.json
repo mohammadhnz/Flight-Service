@@ -13,13 +13,5 @@
     "pg": "^8.0.1",
     "request": "^2.88.2",
     "uuid": "^9.0.0"
-  },
-  "devDependencies": {
-    "supertest": "^4.0.2",
-    "tape": "^4.11.0"
-  },
-  "scripts": {
-    "serve": "node main.js",
-    "test-tape": "node tests/main.js"
   }
 }

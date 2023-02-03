@@ -10,13 +10,13 @@ function Home() {
 
     return (
         <>
-            {/*<Container maxWidth="sm" className=" rmdp-rtl">*/}
-            {/*    <row>*/}
-            {/*        <Ticket/>*/}
-            {/*    </row>*/}
-            {/*</Container>*/}
-            {/*<ButtonBases/>*/}
-            <Test/>
+            <Container maxWidth="sm" className=" rmdp-rtl">
+                <row>
+                    <Ticket/>
+                </row>
+            </Container>
+            <ButtonBases/>
+            {/*<Test/>*/}
         </>
     );
 };

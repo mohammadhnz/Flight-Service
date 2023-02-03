@@ -16,6 +16,8 @@ services:
     environment:
       - TZ=Asia/Tehran
       - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./postgres/csvs:/var/lib/postgresql/csvs
 
   bank:
     build:

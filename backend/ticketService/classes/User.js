@@ -1,5 +1,3 @@
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
-
 class User {
     constructor(id, { first_name, last_name, date_of_birth }) {
         this.id = id;

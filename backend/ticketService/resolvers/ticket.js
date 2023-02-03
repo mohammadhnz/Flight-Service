@@ -18,7 +18,7 @@ const getTickets = async (_, callback) => {
                 return new GetProduct(id, rest);
             });
             console.log(products);*/
-            callback(null, { rows }); 
+            callback(null, { list: rows }); 
         }
         else {
             callback({
@@ -32,8 +32,18 @@ const getTickets = async (_, callback) => {
     }
 };
 
+
+const getNews = async (_, callback) => {
+    callback(null,  { list: [ {
+        title: "salam",
+        imageUrl: "salam",
+        redirectUrl: "FEOHOIEF",
+   }]}); 
+};
+
 module.exports = {
     getTickets,
+    getNews,
 };
 
 /*

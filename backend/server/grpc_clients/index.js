@@ -13,6 +13,7 @@ const ticketProto = grpc.loadPackageDefinition(ticketDefinition);
 
 const TicketService = ticketProto.TicketService;
 
+
 const ticket_grpc = new TicketService('localhost:50050', grpc.credentials.createInsecure());
 
 module.exports = {

@@ -56,17 +56,17 @@ message OriginDestination {
 }
 
 message Ticket {
-    uint32 flightId = 1;
+    uint32 flight_id = 1;
     string origin = 2;
     string description = 3;
-    uint64 departureUtc = 4;
-    uint64 arrivalLocalTime = 5;
-    uint64 yPrice = 6;
-    uint64 jPrice = 7;
-    uint64 fPrice = 8;
-    uint64 yClassFreeCapacity = 9;
-    uint64 jClassFreeCapacity = 10;
-    uint64 fClassFreeCapacity = 11;
+    uint64 departure_utc = 4;
+    uint64 arrival_local_time = 5;
+    uint64 y_price = 6;
+    uint64 j_price = 7;
+    uint64 f_price = 8;
+    uint64 y_class_free_capacity = 9;
+    uint64 j_class_free_capacity = 10;
+    uint64 f_class_free_capacity = 11;
     uint64 equipment = 12;
 }
 
@@ -83,6 +83,6 @@ message Passenger {
 
 message News {
     string title = 1;
-    string imageUrl = 2;
-    string redirectUrl = 3;
+    string image_url = 2;
+    string redirect_url = 3;
 }

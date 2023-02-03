@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+service TicketService {
+    rpc suggestOriginDestination(Name) returns (OriginDestinationList) {}
+    rpc getNews(Empty) returns (NewsList) {}
+    rpc searchTickets(SearchParams) returns (TicketList) {}
+    rpc fillTicketParams(TicketId) returns (UserTicket) {}
+    rpc parchase(UserTicketId) returns (UserTicket) {}
+    rpc getUserTickets(UserId) returns (UserTicketList) {}
+}
+
+message Empty {}
+
+message UserId {
+    string userId = 1;
+}
+
+message TicketId {
+    string ticketId = 1;
+}
+
+message UserTicketId {
+    string userTicketId = 1;
+}
+
+message OriginDestinationList {
+    repeated OriginDestination list = 1;
+}
+
+message TicketList {
+    repeated Ticket list = 1;
+}
+
+message UserTicketList {
+    repeated UserTicket list = 1;
+}
+
+message NewsList {
+    repeated News list = 1;
+}
+
+message SearchParams {
+    float pct = 1;
+    uint32 value_in_cents = 2;
+}
+
+message Name {
+    string name = 1;
+}
+
+message OriginDestination {
+    string country = 1;
+    string city = 2;
+    string airport = 3;
+    string iata = 4;
+}
+
+message Ticket {
+    uint32 flightId = 1;
+    string origin = 2;
+    string description = 3;
+    uint64 departureUtc = 4;
+    uint64 arrivalLocalTime = 5;
+    uint64 yPrice = 6;
+    uint64 jPrice = 7;
+    uint64 fPrice = 8;
+    uint64 yClassFreeCapacity = 9;
+    uint64 jClassFreeCapacity = 10;
+    uint64 fClassFreeCapacity = 11;
+    uint64 equipment = 12;
+}
+
+message UserTicket {
+    repeated Passenger passengers = 1;
+    Ticket ticket = 2;
+}
+
+message Passenger {
+    string name = 1;
+    string family = 2;
+    string passport = 3;
+}
+
+message News {
+    string title = 1;
+    string imageUrl = 2;
+    string redirectUrl = 3;
+}

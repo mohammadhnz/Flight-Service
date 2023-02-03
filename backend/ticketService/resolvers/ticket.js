@@ -6,11 +6,11 @@ const uuid = require('uuid').v4;
 function buildQuery({ origin, destination, departure_time , return_time , number_of_passengers}) {
     let params = [];
     let sql = 'SELECT * FROM available_offers where true'
-    if(origin){
+    if(origin && origin.toLowerCase()!="all"){
         params.push(origin);
         sql += ' and origin = $' + params.length.toString();
     }
-    if(destination){
+    if(destination && destination.toLowerCase()!="all"){
         params.push(destination);
         sql += ' and destination = $' + params.length.toString();
     }
@@ -79,24 +79,34 @@ async function getFlightSerial(flight_id) {
     return rows[0].flight_serial;
 }
 
-function splitFlights(request, row) {
-    const results = [];
-    const flight_classes = ["Business", 'Economy', 'First Class'];
-    for(const class_name of Object.values(flight_classes)) {
-        const data = getFlightClassData(row, class_name, request.number_of_passengers);
-        if(data.free_capacity >= request.number_of_passengers){
-            results.push(data);
-        }
-    }
-    return results;
+function getFullFlightData(request, row) {
+    return {
+        flight_id: row.flight_id,
+        flight_serial: row.flight_serial,
+        origin: row.origin,
+        destination: row.destination,
+        duration: row.duration,
+        equipment: row.equipment,
+        y_price: row.y_price, 
+        j_price: row.j_price, 
+        f_price: row.f_price, 
+        y_class_free_capacity: row.y_class_free_capacity, 
+        j_class_free_capacity: row.j_class_free_capacity, 
+        f_class_free_capacity: row.f_class_free_capacity, 
+        y_is_limited_capacity: (row.y_class_free_capacity <= 3 * request.number_of_passengers), 
+        j_is_limited_capacity: (row.j_class_free_capacity <= 3 * request.number_of_passengers), 
+        f_is_limited_capacity: (row.f_class_free_capacity <= 3 * request.number_of_passengers), 
+        departure_local_time: row.departure_local_time.getTime(),
+        arrival_local_time: row.arrival_local_time.getTime(),
+    };
 }
 
 const searchFlights = async ({request}, callback) => {
     try {
         const query = buildQuery(request);
         const { rows } = await db.query(query);
-        const result = rows.reduce((re, r) => re.concat(splitFlights(request, r)), [])
         if (rows.length !== 0) {
+            const result = rows.map(r => getFullFlightData(request, r));
             callback(null, { list: result}); 
         }
         else {
@@ -113,10 +123,22 @@ const searchFlights = async ({request}, callback) => {
 
 const getNews = async (_, callback) => {
     callback(null,  { list: [ {
-        title: "salam",
-        imageUrl: "salam",
-        redirectUrl: "FEOHOIEF",
-   }]}); 
+        title: "خبر ۱",
+        image_url: "http://localhost:8081/image/news1.png",
+        redirect_url: "http://localhost:7777/blog/1",
+    },{
+        title: "خبر ۲",
+        image_url: "http://localhost:8081/image/news2.png",
+        redirect_url: "http://localhost:7777/blog/2",
+    },{
+        title: "خبر ۳",
+        image_url: "http://localhost:8081/image/news3.png",
+        redirect_url: "http://localhost:7777/blog/3",
+    },{
+        title: "خبر ۴",
+        image_url: "http://localhost:8081/image/news4.png",
+        redirect_url: "http://localhost:7777/blog/4",
+    }]}); 
 };
 
 
@@ -183,11 +205,10 @@ async function getTicketData(row) {
     };
 }
 
-async function getTicket(user_id, tracking_code) {
+async function getTicket(tracking_code) {
     const query = {
-        text: 'select * from purchase where (corresponding_user_id = $1 and tracking_code = $2)',
+        text: 'select * from purchase where (tracking_code = $1)',
         values: [
-            user_id,
             tracking_code, 
         ],
     };
@@ -236,7 +257,7 @@ const createTicket = async ({request: {user_id, flight_id, class_name, passenger
         };
         const {rowCount} = await db.query(query);
         if (rowCount === 1) {
-            callback(null, await getTicket(user_id, tracking_code)); 
+            callback(null, await getTicket(tracking_code)); 
         }
         else {
             callback({
@@ -251,19 +272,18 @@ const createTicket = async ({request: {user_id, flight_id, class_name, passenger
 };
 
 
-const parchase = async ({request: {user_id, tracking_code, status}}, callback) => {
+const parchase = async ({request: {tracking_code, status}}, callback) => {
     try {
         const query = {
-            text: 'update purchase set transaction_result = $1 where (corresponding_user_id = $2 and tracking_code = $3)',
+            text: 'update purchase set transaction_result = $1 where (tracking_code = $2)',
             values: [
                 status,
-                user_id,
                 tracking_code, 
             ],
         };
         const {rowCount} = await db.query(query);
         if (rowCount === 1) {
-            callback(null, await getTicket(user_id, tracking_code)); 
+            callback(null, await getTicket(tracking_code)); 
         }
         else {
             callback({

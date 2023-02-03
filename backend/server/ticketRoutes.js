@@ -64,7 +64,6 @@ router.post("/ticket/buy", authHandler, (req, res) => {
 
 router.get("/payment/callback/:code/:status", (req, res) => {
   ticket_grpc.parchase({
-    user_id: req.user.id,
     tracking_code: req.params.code,
     status: req.params.status,
   }, (error, response) => {

@@ -23,9 +23,8 @@ message TicketForm {
 }
 
 message TransactionParams {
-    string user_id = 1;
-    string tracking_code = 2;
-    string status = 3;
+    string tracking_code = 1;
+    string status = 2;
 }
 
 message OriginDestinationList {
@@ -69,6 +68,25 @@ message Flight {
     string origin = 2;
     string destination = 3;
     Duration duration = 4;
+    uint32 y_price = 5;
+    uint32 j_price = 6;
+    uint32 f_price = 7;
+    uint32 y_class_free_capacity = 8;
+    uint32 j_class_free_capacity = 9;
+    uint32 f_class_free_capacity = 10;
+    bool y_is_limited_capacity = 11;
+    bool j_is_limited_capacity = 12;
+    bool f_is_limited_capacity = 13;
+    string equipment = 14;
+    uint64 departure_local_time = 15;
+    uint64 arrival_local_time = 16;
+}
+
+message FlightClass {
+    string flight_id = 1;
+    string origin = 2;
+    string destination = 3;
+    Duration duration = 4;
     uint32 price = 5;
     uint32 free_capacity = 6;
     bool is_limited_capacity = 7;
@@ -86,7 +104,7 @@ message Duration {
 
 message Ticket {
     uint32 transaction_id = 1;
-    Flight flight = 2;
+    FlightClass flight = 2;
     repeated Passenger passengers = 3;
     string payment_url = 4;
 }

@@ -1,5 +1,5 @@
 package models
 
 //type UnauthorizedToken struct {
-//	user_id intm
+//	User User `gorm:"foreignKey:U"`
 //}

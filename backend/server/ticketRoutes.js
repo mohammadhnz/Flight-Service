@@ -4,12 +4,11 @@ const router = express.Router()
 const { ticket_grpc, auth_grpc } = require("./grpc_clients");
 
 router.get("/news/", (req, res) => {
-  console.log(ticket_grpc.getNews);
   ticket_grpc.getNews({}, (error, response) => {
     if (!error) {
       const { list } = response;
-      console.log('[GET] products', response);
-      return res.json({ ok: true, list});
+      console.log('[GET] news', response.length);
+      return res.json({ ok: true, data: list});
     } else {
       console.error(error);
       return res.status(500).json({ ok: false, error});
@@ -18,12 +17,12 @@ router.get("/news/", (req, res) => {
 });
 
 router.get("/tickets/", (req, res) => {
-  console.log(ticket_grpc.getNews);
-  ticket_grpc.searchTickets({}, (error, response) => {
+  console.log(req.query, req.params)
+  ticket_grpc.searchTickets(req.query, (error, response) => {
     if (!error) {
       const { list } = response;
       console.log('search tickets', list.length);
-      return res.json({ ok: true, list});
+      return res.json({ ok: true, data: list});
     } else {
       console.error(error);
       return res.status(500).json({ ok: false, error});

@@ -1,10 +1,10 @@
 // https://www.npmjs.com/package/@grpc/proto-loader
 
 const options = {
-    keepCase: false, // important to use true
+    keepCase: true, // important to use true
     longs: String,
     enums: String,
-    defaults: true,
+    defaults: false,
     oneofs: true
 };
 

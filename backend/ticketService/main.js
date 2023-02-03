@@ -12,7 +12,6 @@ const productproto = grpc.loadPackageDefinition(packageDefinition);
 
 const main = () => {
     const server = new grpc.Server()
-    console.log(productproto.TicketService.service);
 
     server.addService(productproto.TicketService.service, ticketResolvers);
     const port = "0.0.0.0:50050";

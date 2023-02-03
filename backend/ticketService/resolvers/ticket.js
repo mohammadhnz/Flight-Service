@@ -2,31 +2,54 @@ const grpc = require('grpc');
 const db = require('../data-access/db');
 const { GetProduct, } = require("../classes/Ticket");
 
-const searchTickets = async (_, callback) => {
-    console.log('resq');
-    const sql = 'SELECT * FROM available_offers';
-    const query = {
+function buildQuery({ origin, destination, departure_time , return_time , number_of_passengers}) {
+    let params = [];
+    let sql = 'SELECT * FROM available_offers where true'
+    if(origin){
+        params.push(origin);
+        sql += ' and origin = $' + params.length.toString();
+    }
+    if(destination){
+        params.push(destination);
+        sql += ' and destination = $' + params.length.toString();
+    }
+    if(departure_time){
+        params.push(new Date(departure_time).toISOString());
+        sql += ' and date_trunc(\'day\', departure_local_time) = date_trunc(\'day\', cast($'+params.length.toString()+' as timestamp))';
+    }
+    if(return_time){
+        params.push(new Date(return_time).toISOString());
+        sql += ' and date_trunc(\'day\', arrival_local_time) = date_trunc(\'day\', cast($'+params.length.toString()+' as timestamp))';
+    }
+    if(number_of_passengers){
+        params.push(number_of_passengers);
+        sql += ' and (y_class_free_capacity > $' + params.length.toString();
+        sql += ' or j_class_free_capacity > $' + params.length.toString();
+        sql += ' or f_class_free_capacity > $' + params.length.toString() + ')';
+    }
+    sql += ' limit 30';
+    console.log(sql, params);
+    return {
         text: sql,
+        values: params,
     };
+}
 
+
+const searchTickets = async ({request}, callback) => {
     try {
-        console.log('resq12');
+        const query = buildQuery(request);
         const { rows } = await db.query(query);
-        console.log('resq1');
-        console.log(rows);
         if (rows.length !== 0) {
-            console.log('resq2');
             callback(null, { list: rows }); 
         }
         else {
-            console.log('resq3');
             callback({
                 code: grpc.status.NOT_FOUND,
                 details: "Not Found"
             })
         }
     } catch(e) {
-        console.log('res3q');
         console.log(e);
         callback(e);
     }

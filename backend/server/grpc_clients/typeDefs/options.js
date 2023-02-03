@@ -4,7 +4,7 @@ const options = {
     keepCase: true, // important to use true
     longs: String,
     enums: String,
-    defaults: true,
+    defaults: false,
     oneofs: true
 };
 

@@ -1,5 +1,5 @@
 const grpc = require('grpc');
-const db = require('../data-access/db');
+const db = require('../data_access/db');
 const request = require('request');
 const uuid = require('uuid').v4;
 

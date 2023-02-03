@@ -83,8 +83,9 @@ message Duration {
 }
 
 message Ticket {
-    Flight flight = 1;
-    repeated Passenger passengers = 2;
+    uint32 id = 1;
+    Flight flight = 2;
+    repeated Passenger passengers = 3;
 }
 
 message Passenger {

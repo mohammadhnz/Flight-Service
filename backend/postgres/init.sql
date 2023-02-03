@@ -77,7 +77,6 @@ CREATE TABLE IF NOT EXISTS country
     country_name VARCHAR PRIMARY KEY
 );
 
--- https://www.postgresql.org/docs/8.1/datetime-keywords.html
 CREATE TABLE IF NOT EXISTS city
 (
     country_name  VARCHAR REFERENCES country ON DELETE RESTRICT ON UPDATE RESTRICT,
@@ -139,16 +138,17 @@ CREATE INDEX ON flight (origin, destination, departure_utc);
 
 -- Purchases
 
-CREATE TABLE IF NOT EXISTS purchase
+CREATE TABLE purchase
 (
     corresponding_user_id INTEGER,
-    title                 VARCHAR,
-    first_name            VARCHAR,
-    last_name             VARCHAR,
-    flight_serial         INTEGER,
-    offer_price           INTEGER,
-    offer_class           VARCHAR
-    -- TODO: transactions
+    title VARCHAR,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    flight_serial INTEGER REFERENCES flight ON DELETE RESTRICT ON UPDATE RESTRICT,
+    offer_price INTEGER,
+    offer_class VARCHAR,
+    transaction_id SERIAL PRIMARY KEY,
+    transaction_result INTEGER
 );
 
 -- OFFERS

@@ -61,4 +61,22 @@ router.post("/ticket/buy", authHandler, (req, res) => {
   });
 });
 
+
+router.get("/ticket/list", authHandler, (req, res) => {
+  ticket_grpc.buyTicket({
+    user_id: req.user.id,
+    flight_id: req.body.flight_id,
+    class_name: req.body.class_name,
+    passengers: req.body.passengers,
+  }, (error, response) => {
+    if (!error) {
+      const ticket = response;
+      return res.json({ ok: true, data: ticket});
+    } else {
+      console.error(error);
+      return res.status(500).json({ ok: false, error});
+    }
+  });
+});
+
 module.exports = router;

@@ -1,6 +1,6 @@
 const grpc = require('grpc');
 const db = require('../data-access/db');
-const { GetProduct, } = require("../classes/Ticket");
+var request = require('request');
 
 function buildQuery({ origin, destination, departure_time , return_time , number_of_passengers}) {
     let params = [];
@@ -40,6 +40,7 @@ function getFlightClassData(row, class_name, number_of_passengers){
     const c = class_names[class_name];
     return {
         flight_id: row.flight_id,
+        flight_serial: row.flight_serial,
         origin: row.origin,
         destination: row.destination,
         duration: row.duration,
@@ -62,6 +63,14 @@ async function getFlightData(flight_id, class_name, number_of_passengers) {
     return getFlightClassData(rows[0], class_name, number_of_passengers);
 }
 
+
+async function getFlightSerial(flight_id) {
+    const { rows } = await db.query({text: "SELECT * FROM flight where flight_id = $1", values: [flight_id]});
+    if (rows.length === 0){
+        return null;
+    }
+    return rows[0].flight_serial;
+}
 
 function splitFlights(request, row) {
     const results = [];
@@ -132,7 +141,7 @@ const suggestOriginDestination = async ({request: {name}}, callback) => {
 };
 
 function getPurchaseTitle(flight) {
-    return "پرداخت هزینه برای پرواز شماره "+flight.flight_id+", هزینه: "+flight.price;
+    return "پرداخت هزینه برای پرواز شماره "+flight.flight_serial+", هزینه: "+flight.price;
 }
 
 const buyTicket = async ({request}, callback) => {
@@ -147,6 +156,8 @@ const buyTicket = async ({request}, callback) => {
             });
         }
         console.log("AJAABB", flight);
+        const flight_serial = await getFlightSerial(flight.flight_id);
+        console.log("DDDE", flight_serial);
         const query = {
             text: 'insert into purchase ('
                 + 'corresponding_user_id,'
@@ -156,20 +167,21 @@ const buyTicket = async ({request}, callback) => {
                 + 'flight_serial,'
                 + 'offer_price,'
                 + 'offer_class'
-            + ') values ($1, $2, $3, $4, $5, $6, $7)',
+            + ') values ($1, $2, $3, $4, $5, $6, $7) RETURNING transaction_id',
             values: [
                 user_id,
                 getPurchaseTitle(flight), 
                 passengers[0].name, 
                 passengers[0].family, 
-                parseInt(flight.flight_id, 16), 
+                flight_serial, 
                 flight.price, 
                 flight.class_name,
             ],
         };
-        const {rowCount} = await db.query(query);
+        const {rowCount, rows} = await db.query(query);
+        console.log(rowCount, rows);
         if (rowCount === 1) {
-            callback(null, {flight: flight, passengers: [passengers[0]]}); 
+            callback(null, {id: rows[0].transaction_id, flight: flight, passengers: [passengers[0]]}); 
         }
         else {
             callback({

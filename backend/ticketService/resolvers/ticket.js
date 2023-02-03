@@ -35,36 +35,51 @@ function buildQuery({ origin, destination, departure_time , return_time , number
     };
 }
 
-function splitTickets(request, row) {
+function getFlightClassData(row, class_name, number_of_passengers){
+    const class_names = {"Business": 'y', 'Economy': "j", 'First Class': "f"};
+    const c = class_names[class_name];
+    return {
+        flight_id: row.flight_id,
+        origin: row.origin,
+        destination: row.destination,
+        duration: row.duration,
+        equipment: row.equipment,
+        class_name: class_name, 
+        price: row[c+'_price'], 
+        free_capacity: row[c+'_class_free_capacity'], 
+        is_limited_capacity: (row[c+'_class_free_capacity'] <= 3 * number_of_passengers), 
+        departure_local_time: row.departure_local_time.getTime(),
+        arrival_local_time: row.arrival_local_time.getTime(),
+    };
+}
+
+async function getFlightData(flight_id, class_name, number_of_passengers) {
+    const { rows } = await db.query({text: "SELECT * FROM available_offers where flight_id = $1", values: [flight_id]});
+    if (rows.length === 0){
+        return null;
+    }
+    console.log(rows[0],class_name,  number_of_passengers);
+    return getFlightClassData(rows[0], class_name, number_of_passengers);
+}
+
+
+function splitFlights(request, row) {
     const results = [];
-    const flight_classes = ['y', 'j', 'f'];
-    const class_names = {'y': "Business", 'j': "Economy", 'f': "First Class"};
-    for(const c of Object.values(flight_classes)) {
-        if(row[c+'_class_free_capacity'] < request.number_of_passengers){
-            continue;
+    const flight_classes = ["Business", 'Economy', 'First Class'];
+    for(const class_name of Object.values(flight_classes)) {
+        const data = getFlightClassData(row, class_name, request.number_of_passengers);
+        if(data.free_capacity >= request.number_of_passengers){
+            results.push(data);
         }
-        results.push({
-            flight_id: row.flight_id,
-            origin: row.origin,
-            destination: row.destination,
-            duration: row.duration,
-            equipment: row.equipment,
-            class_name: class_names[c], 
-            price: row[c+'_price'], 
-            free_capacity: row[c+'_class_free_capacity'], 
-            is_limited_capacity: (row[c+'_class_free_capacity'] <= 3 * request.number_of_passengers), 
-            departure_local_time: row.departure_local_time.getTime(),
-            arrival_local_time: row.arrival_local_time.getTime(),
-        });
     }
     return results;
 }
 
-const searchTickets = async ({request}, callback) => {
+const searchFlights = async ({request}, callback) => {
     try {
         const query = buildQuery(request);
         const { rows } = await db.query(query);
-        const result = rows.reduce((re, r) => re.concat(splitTickets(request, r)), [])
+        const result = rows.reduce((re, r) => re.concat(splitFlights(request, r)), [])
         if (rows.length !== 0) {
             callback(null, { list: result}); 
         }
@@ -80,7 +95,6 @@ const searchTickets = async ({request}, callback) => {
     }
 };
 
-
 const getNews = async (_, callback) => {
     callback(null,  { list: [ {
         title: "salam",
@@ -89,9 +103,91 @@ const getNews = async (_, callback) => {
    }]}); 
 };
 
+
+const suggestOriginDestination = async ({request: {name}}, callback) => {
+    try {
+        const query = {
+            text: 'select * from origin_destination '
+            + 'where city ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
+            + 'or county ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
+            + 'or airport ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
+            + 'or iata ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
+            + 'limit 10',
+            values: [name],
+        };
+        const { rows } = await db.query(query);
+        if (rows.length !== 0) {
+            callback(null, { list: rows}); 
+        }
+        else {
+            callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            })
+        }
+    } catch(e) {
+        console.log(e);
+        callback(e);
+    }
+};
+
+function getPurchaseTitle(flight) {
+    return "پرداخت هزینه برای پرواز شماره "+flight.flight_id+", هزینه: "+flight.price;
+}
+
+const buyTicket = async ({request}, callback) => {
+    try {
+        const {user_id, flight_id, class_name, passengers} = request;
+        console.log(request);
+        const flight = await getFlightData(flight_id, class_name, passengers.length);
+        if (flight === null){
+            return callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            });
+        }
+        console.log("AJAABB", flight);
+        const query = {
+            text: 'insert into purchase ('
+                + 'corresponding_user_id,'
+                + 'title,'
+                + 'first_name,'
+                + 'last_name,'
+                + 'flight_serial,'
+                + 'offer_price,'
+                + 'offer_class'
+            + ') values ($1, $2, $3, $4, $5, $6, $7)',
+            values: [
+                user_id,
+                getPurchaseTitle(flight), 
+                passengers[0].name, 
+                passengers[0].family, 
+                parseInt(flight.flight_id, 16), 
+                flight.price, 
+                flight.class_name,
+            ],
+        };
+        const {rowCount} = await db.query(query);
+        if (rowCount === 1) {
+            callback(null, {flight: flight, passengers: [passengers[0]]}); 
+        }
+        else {
+            callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            })
+        }
+    } catch(e) {
+        console.log(e);
+        callback(e);
+    }
+};
+
 module.exports = {
-    searchTickets,
+    searchFlights,
     getNews,
+    suggestOriginDestination,
+    buyTicket,
 };
 
 /*

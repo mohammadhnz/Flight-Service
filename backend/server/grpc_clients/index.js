@@ -9,7 +9,7 @@ const ticketDefinition = protoLoader.loadSync(TICKET_PATH, options);
 const authDefinition = protoLoader.loadSync(AUTH_PATH, options);
 
 const ticketProto = grpc.loadPackageDefinition(ticketDefinition);
-const authProto = grpc.loadPackageDefinition(ticketDefinition);
+const authProto = grpc.loadPackageDefinition(authDefinition);
 
 const TicketService = ticketProto.TicketService;
 const AuthService = authProto.AuthService;

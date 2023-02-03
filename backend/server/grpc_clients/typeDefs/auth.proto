@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-service TicketService {
+service AuthService {
     rpc authenticate(AuthRequest) returns (AuthResponse) {}
 }
 
@@ -9,7 +9,7 @@ message AuthRequest {
     repeated string headers = 2;
 }
 
-message AuthResponce {
+message AuthResponse {
     bool success = 1;
     uint32 code = 2;
     User user = 3;

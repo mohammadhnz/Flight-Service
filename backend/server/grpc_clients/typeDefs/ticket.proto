@@ -3,10 +3,10 @@ syntax = "proto3";
 service TicketService {
     rpc suggestOriginDestination(Name) returns (OriginDestinationList) {}
     rpc getNews(Empty) returns (NewsList) {}
-    rpc searchTickets(SearchParams) returns (TicketList) {}
-    rpc fillTicketParams(TicketId) returns (UserTicket) {}
-    rpc parchase(UserTicketId) returns (UserTicket) {}
-    rpc getUserTickets(UserId) returns (UserTicketList) {}
+    rpc searchFlights(SearchParams) returns (FlightList) {}
+    rpc buyTicket(TicketForm) returns (Ticket) {}
+    rpc parchase(TicketId) returns (Ticket) {}
+    rpc getUsersTickets(UserId) returns (TicketList) {}
 }
 
 message Empty {}
@@ -15,24 +15,27 @@ message UserId {
     string userId = 1;
 }
 
-message TicketId {
-    string ticketId = 1;
+message TicketForm {
+    string user_id = 1;
+    string flight_id = 2;
+    string class_name = 3;
+    repeated Passenger passengers = 4;
 }
 
-message UserTicketId {
-    string userTicketId = 1;
+message TicketId {
+    string ticket_id = 1;
 }
 
 message OriginDestinationList {
     repeated OriginDestination list = 1;
 }
 
-message TicketList {
-    repeated Ticket list = 1;
+message FlightList {
+    repeated Flight list = 1;
 }
 
-message UserTicketList {
-    repeated UserTicket list = 1;
+message TicketList {
+    repeated Ticket list = 1;
 }
 
 message NewsList {
@@ -53,13 +56,13 @@ message Name {
 }
 
 message OriginDestination {
-    string country = 1;
+    string county = 1;
     string city = 2;
     string airport = 3;
     string iata = 4;
 }
 
-message Ticket {
+message Flight {
     string flight_id = 1;
     string origin = 2;
     string destination = 3;
@@ -79,9 +82,9 @@ message Duration {
     uint32 seconds = 3;
 }
 
-message UserTicket {
-    repeated Passenger passengers = 1;
-    Ticket ticket = 2;
+message Ticket {
+    Flight flight = 1;
+    repeated Passenger passengers = 2;
 }
 
 message Passenger {

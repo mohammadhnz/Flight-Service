@@ -2,9 +2,9 @@
 
 const auth_grpc = {
   authenticate: (data, callback) => {
-    // return callback(null, {success: false, code: 403});
-    return callback("error");
-    // return callback(null, {success: true, user: {id: 34}});
+    //return callback(null, {success: false, code: 403});
+    // return callback("error");
+    return callback(null, {success: true, user: {id: 34}});
   },
 }
 
@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
       req.user = response.user;
       next();
     } else {
-      return res.send(error ? 500: response.code);
+      return res.sendStatus(error ? 500: response.code);
     }
   });
 }

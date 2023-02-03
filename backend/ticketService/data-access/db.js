@@ -15,8 +15,8 @@ client.on('error', (e)=>{
 })
 
 module.exports = {
-    query: (text, params, callback) => {
-        return client.query(text, params, callback);
+    query: ({text, values}, callback) => {
+        return client.query(text, values, callback);
     },
 };
 

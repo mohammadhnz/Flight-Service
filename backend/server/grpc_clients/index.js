@@ -1,9 +1,9 @@
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 
-const TICKET_PATH = "./grpc_clients/typeDefs/ticket.proto";
-const AUTH_PATH = "./grpc_clients/typeDefs/auth.proto";
-const options = require("./typeDefs/options");
+const TICKET_PATH = "./grpc_clients/type_defs/ticket.proto";
+const AUTH_PATH = "./grpc_clients/type_defs/auth.proto";
+const options = require("./type_defs/options");
 
 const ticketDefinition = protoLoader.loadSync(TICKET_PATH, options);
 const authDefinition = protoLoader.loadSync(AUTH_PATH, options);

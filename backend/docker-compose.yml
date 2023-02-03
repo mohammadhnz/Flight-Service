@@ -25,6 +25,8 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8080"
+    ports:
+      - "8080:8080"
 
   ticket:
     build:
@@ -37,6 +39,7 @@ services:
       - bank
     links:
       - postgres
+      - redis
       - bank
 
   server:

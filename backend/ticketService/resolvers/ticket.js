@@ -3,6 +3,7 @@ const db = require('../data_access/db');
 const request = require('request');
 const uuid = require('uuid').v4;
 
+
 function buildQuery({ origin, destination, departure_time , return_time , number_of_passengers}) {
     let params = [];
     let sql = 'SELECT * FROM available_offers where true'
@@ -49,13 +50,13 @@ function getFlightClassData(row, class_name, number_of_passengers){
         price: row[c+'_price'], 
         free_capacity: row[c+'_class_free_capacity'], 
         is_limited_capacity: (row[c+'_class_free_capacity'] <= 3 * number_of_passengers), 
-        departure_local_time: row.departure_local_time.getTime(),
-        arrival_local_time: row.arrival_local_time.getTime(),
+        departure_local_time: new Date(row.departure_local_time).getTime(),
+        arrival_local_time: new Date(row.arrival_local_time).getTime(),
     };
 }
 
 async function getFlightData(flight_id, class_name, number_of_passengers) {
-    const { rows } = await db.query({text: "SELECT * FROM available_offers where flight_id = $1", values: [flight_id]});
+    const { rows } = await db.queryIndex('AvailableOffersByFlightId', flight_id);
     if (rows.length === 0){
         return null;
     }
@@ -63,7 +64,7 @@ async function getFlightData(flight_id, class_name, number_of_passengers) {
 }
 
 async function getFlightDataWithSerial(flight_serial, class_name) {
-    const { rows } = await db.query({text: "SELECT * FROM flight where flight_serial = $1", values: [flight_serial]});
+    const { rows } = await db.queryIndex('FlightByFlightSerial', flight_serial);
     if (rows.length === 0){
         return null;
     }
@@ -72,7 +73,7 @@ async function getFlightDataWithSerial(flight_serial, class_name) {
 
 
 async function getFlightSerial(flight_id) {
-    const { rows } = await db.query({text: "SELECT * FROM flight where flight_id = $1", values: [flight_id]});
+    const { rows } = await db.queryIndex('FlightByFlightId', flight_id);
     if (rows.length === 0){
         return null;
     }
@@ -96,15 +97,15 @@ function getFullFlightData(request, row) {
         y_is_limited_capacity: (row.y_class_free_capacity <= 3 * request.number_of_passengers), 
         j_is_limited_capacity: (row.j_class_free_capacity <= 3 * request.number_of_passengers), 
         f_is_limited_capacity: (row.f_class_free_capacity <= 3 * request.number_of_passengers), 
-        departure_local_time: row.departure_local_time.getTime(),
-        arrival_local_time: row.arrival_local_time.getTime(),
+        departure_local_time: new Date(row.departure_local_time).getTime(),
+        arrival_local_time: new Date(row.arrival_local_time).getTime(),
     };
 }
 
 const searchFlights = async ({request}, callback) => {
     try {
         const query = buildQuery(request);
-        const { rows } = await db.query(query);
+        const { rows } = await db.complexSelect(query);
         if (rows.length !== 0) {
             const result = rows.map(r => getFullFlightData(request, r));
             callback(null, { list: result}); 
@@ -144,16 +145,7 @@ const getNews = async (_, callback) => {
 
 const suggestOriginDestination = async ({request: {name}}, callback) => {
     try {
-        const query = {
-            text: 'select * from origin_destination '
-            + 'where city ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'or county ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'or airport ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'or iata ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'limit 10',
-            values: [name],
-        };
-        const { rows } = await db.query(query);
+        const { rows } = await db.queryIndex('SuggestOriginDestination', name);
         if (rows.length !== 0) {
             callback(null, { list: rows}); 
         }
@@ -206,13 +198,7 @@ async function getTicketData(row) {
 }
 
 async function getTicket(tracking_code) {
-    const query = {
-        text: 'select * from purchase where (tracking_code = $1)',
-        values: [
-            tracking_code, 
-        ],
-    };
-    const {rows} = await db.query(query);
+    const {rows} = await db.queryIndex('PurchaseByTrackingCode', tracking_code);
     if(rows.length===0){
         return null;
     }
@@ -254,8 +240,15 @@ const createTicket = async ({request: {user_id, flight_id, class_name, passenger
                 transaction_id,
                 tracking_code,
             ],
+            dirtyIndexes: [{
+                index: 'PurchaseByTrackingCode',
+                values: [tracking_code],
+            },{
+                index: 'PurchaseByUserId',
+                values: [user_id],
+            }]
         };
-        const {rowCount} = await db.query(query);
+        const {rowCount} = await db.insert(query);
         if (rowCount === 1) {
             callback(null, await getTicket(tracking_code)); 
         }
@@ -280,8 +273,14 @@ const parchase = async ({request: {tracking_code, status}}, callback) => {
                 status,
                 tracking_code, 
             ],
+            dirtyIndexes: [{
+                index: 'PurchaseByTrackingCode',
+                values: [tracking_code],
+            },{
+                index: 'PurchaseByUserId'
+            }]
         };
-        const {rowCount} = await db.query(query);
+        const {rowCount} = await db.update(query);
         if (rowCount === 1) {
             callback(null, await getTicket(tracking_code)); 
         }
@@ -300,11 +299,7 @@ const parchase = async ({request: {tracking_code, status}}, callback) => {
 
 const getUsersTickets = async ({request: {user_id}}, callback) => {
     try {
-        const query = {
-            text: 'select * from purchase where corresponding_user_id = $1',
-            values: [user_id],
-        };
-        const {rows} = await db.query(query);
+        const {rows} = await db.queryIndex('PurchaseByUserId', user_id);
         if (rows.length !== 0) {
             const list = [];
             for(const r of rows){

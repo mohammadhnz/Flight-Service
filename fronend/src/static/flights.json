@@ -1,0 +1,86 @@
+[
+  {
+    "flight_id": "B7364F",
+    "origin": "CAI",
+    "destination": "YQM",
+    "duration": {
+      "hours": 1,
+      "minutes": 25,
+      "seconds": 11
+    },
+    "price": {
+      "Business": 100,
+      "Economy": 50,
+      "First_Class": 200
+    },
+    "free_capacity": 768,
+    "is_limited_capacity": false,
+    "equipment": "Airbus SAS Airbus A380-A388",
+    "departure_local_time": 1675431174000,
+    "arrival_local_time": 1675414685000,
+    "class_name": "Business"
+  },
+  {
+    "flight_id": "B7364F",
+    "origin": "CAI",
+    "destination": "YQM",
+    "duration": {
+      "hours": 1,
+      "minutes": 25,
+      "seconds": 2
+    },
+    "price": {
+      "Business": 100,
+      "Economy": 50,
+      "First_Class": 200
+    },
+    "free_capacity": 50,
+    "is_limited_capacity": true,
+    "equipment": "Airbus SAS Airbus A380-A388",
+    "departure_local_time": 1675431174000,
+    "arrival_local_time": 1675414685000,
+    "class_name": "Economy"
+  },
+  {
+    "flight_id": "B7364F",
+    "origin": "CAI",
+    "destination": "YQM",
+    "duration": {
+      "hours": 1,
+      "minutes": 10,
+      "seconds": 11
+    },
+    "price": {
+      "Business": 100,
+      "Economy": 50,
+      "First_Class": 200
+    },
+    "free_capacity": 35,
+    "is_limited_capacity": false,
+    "equipment": "Airbus SAS Airbus A380-A388",
+    "departure_local_time": 1675431174000,
+    "arrival_local_time": 1675414685000,
+    "class_name": "First Class"
+  },
+    {
+    "flight_id": "B7364F",
+    "origin": "CAI",
+    "destination": "YQM",
+    "duration": {
+      "hours": 1,
+      "minutes": 25,
+      "seconds": 2
+    },
+    "price": {
+      "Business": 100,
+      "Economy": 50,
+      "First_Class": 200
+    },
+    "free_capacity": 50,
+    "is_limited_capacity": true,
+    "equipment": "Airbus SAS Airbus A380-A388",
+    "departure_local_time": 1675431174000,
+    "arrival_local_time": 1675414685000,
+    "class_name": "Economy"
+  }
+]

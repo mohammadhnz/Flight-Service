@@ -4,7 +4,6 @@ import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 import Button from '@material-ui/core/Button';
 import {Autocomplete, FormControlLabel, IconButton, Radio, RadioGroup, TextField} from "@mui/material";
-import {makeStyles} from "@material-ui/core/styles";
 import countryNames from "../../static/countries.json";
 import React, {useState, useEffect} from 'react';
 
@@ -146,11 +145,21 @@ function Ticket() {
                     <label htmlFor="passNum">تعداد مسافران</label>
                     <div style={{display: 'inline-block'}}>
                         <IconButton aria-label="plus" size="large" onClick={upPassNum}>+</IconButton>
-                        <input style={{width: '25ch',}} variant="standard" {...register("passNum", {required: true})} value={passNum}
+                        <input style={{width: '25ch',}} variant="standard" {...register("passNum", {required: true})}
+                               value={passNum}
                                onChange={handlePasNumChange}/>
                         <IconButton aria-label="plus" size="large" onClick={downPassNum}>-</IconButton>
                     </div>
                 </div>
+                <br/>
+                <RadioGroup row aria-label="classNames" name="way" value={ratioVal} onChange={handleRatioChange}>
+                    <FormControlLabel value="buisiness" control={<Radio id="field-around" {...register("class_name")}/>}
+                                      label="اکونومی"/>
+                    <FormControlLabel value="economy" control={<Radio id="field-oneway" {...register("class_name")}/>}
+                                      label="بیزینس"/>
+                    <FormControlLabel value="firstClass" control={<Radio id="field-oneway" {...register("class_name")}/>}
+                                      label="فرست کلاس"/>
+                </RadioGroup>
                 <br/>
                 <Button variant="outlined" type="submit" className="btn btn-primary">
                     Send

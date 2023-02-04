@@ -30,7 +30,7 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-export default function Test() {
+export default function SignUp() {
     const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();

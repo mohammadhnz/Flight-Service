@@ -1,15 +1,17 @@
 const grpc = require('grpc');
-const db = require('../data-access/db');
-const { GetProduct, } = require("../classes/Ticket");
+const db = require('../data_access/db');
+const request = require('request');
+const uuid = require('uuid').v4;
+
 
 function buildQuery({ origin, destination, departure_time , return_time , number_of_passengers}) {
     let params = [];
     let sql = 'SELECT * FROM available_offers where true'
-    if(origin){
+    if(origin && origin.toLowerCase()!="all"){
         params.push(origin);
         sql += ' and origin = $' + params.length.toString();
     }
-    if(destination){
+    if(destination && destination.toLowerCase()!="all"){
         params.push(destination);
         sql += ' and destination = $' + params.length.toString();
     }
@@ -28,7 +30,6 @@ function buildQuery({ origin, destination, departure_time , return_time , number
         sql += ' or f_class_free_capacity > $' + params.length.toString() + ')';
     }
     sql += ' limit 30';
-    console.log(sql, params);
     return {
         text: sql,
         values: params,
@@ -40,6 +41,7 @@ function getFlightClassData(row, class_name, number_of_passengers){
     const c = class_names[class_name];
     return {
         flight_id: row.flight_id,
+        flight_serial: row.flight_serial,
         origin: row.origin,
         destination: row.destination,
         duration: row.duration,
@@ -48,39 +50,64 @@ function getFlightClassData(row, class_name, number_of_passengers){
         price: row[c+'_price'], 
         free_capacity: row[c+'_class_free_capacity'], 
         is_limited_capacity: (row[c+'_class_free_capacity'] <= 3 * number_of_passengers), 
-        departure_local_time: row.departure_local_time.getTime(),
-        arrival_local_time: row.arrival_local_time.getTime(),
+        departure_local_time: new Date(row.departure_local_time).getTime(),
+        arrival_local_time: new Date(row.arrival_local_time).getTime(),
     };
 }
 
 async function getFlightData(flight_id, class_name, number_of_passengers) {
-    const { rows } = await db.query({text: "SELECT * FROM available_offers where flight_id = $1", values: [flight_id]});
+    const { rows } = await db.queryIndex('AvailableOffersByFlightId', flight_id);
     if (rows.length === 0){
         return null;
     }
-    console.log(rows[0],class_name,  number_of_passengers);
     return getFlightClassData(rows[0], class_name, number_of_passengers);
 }
 
-
-function splitFlights(request, row) {
-    const results = [];
-    const flight_classes = ["Business", 'Economy', 'First Class'];
-    for(const class_name of Object.values(flight_classes)) {
-        const data = getFlightClassData(row, class_name, request.number_of_passengers);
-        if(data.free_capacity >= request.number_of_passengers){
-            results.push(data);
-        }
+async function getFlightDataWithSerial(flight_serial, class_name) {
+    const { rows } = await db.queryIndex('FlightByFlightSerial', flight_serial);
+    if (rows.length === 0){
+        return null;
     }
-    return results;
+    return getFlightData(rows[0].flight_id, class_name, 1);
+}
+
+
+async function getFlightSerial(flight_id) {
+    const { rows } = await db.queryIndex('FlightByFlightId', flight_id);
+    if (rows.length === 0){
+        return null;
+    }
+    return rows[0].flight_serial;
+}
+
+function getFullFlightData(request, row) {
+    return {
+        flight_id: row.flight_id,
+        flight_serial: row.flight_serial,
+        origin: row.origin,
+        destination: row.destination,
+        duration: row.duration,
+        equipment: row.equipment,
+        y_price: row.y_price, 
+        j_price: row.j_price, 
+        f_price: row.f_price, 
+        y_class_free_capacity: row.y_class_free_capacity, 
+        j_class_free_capacity: row.j_class_free_capacity, 
+        f_class_free_capacity: row.f_class_free_capacity, 
+        y_is_limited_capacity: (row.y_class_free_capacity <= 3 * request.number_of_passengers), 
+        j_is_limited_capacity: (row.j_class_free_capacity <= 3 * request.number_of_passengers), 
+        f_is_limited_capacity: (row.f_class_free_capacity <= 3 * request.number_of_passengers), 
+        departure_local_time: new Date(row.departure_local_time).getTime(),
+        arrival_local_time: new Date(row.arrival_local_time).getTime(),
+    };
 }
 
 const searchFlights = async ({request}, callback) => {
     try {
         const query = buildQuery(request);
-        const { rows } = await db.query(query);
-        const result = rows.reduce((re, r) => re.concat(splitFlights(request, r)), [])
+        const { rows } = await db.complexSelect(query);
         if (rows.length !== 0) {
+            const result = rows.map(r => getFullFlightData(request, r));
             callback(null, { list: result}); 
         }
         else {
@@ -97,25 +124,28 @@ const searchFlights = async ({request}, callback) => {
 
 const getNews = async (_, callback) => {
     callback(null,  { list: [ {
-        title: "salam",
-        imageUrl: "salam",
-        redirectUrl: "FEOHOIEF",
-   }]}); 
+        title: "خبر ۱",
+        image_url: "http://localhost:8081/image/news1.png",
+        redirect_url: "http://localhost:7777/blog/1",
+    },{
+        title: "خبر ۲",
+        image_url: "http://localhost:8081/image/news2.png",
+        redirect_url: "http://localhost:7777/blog/2",
+    },{
+        title: "خبر ۳",
+        image_url: "http://localhost:8081/image/news3.png",
+        redirect_url: "http://localhost:7777/blog/3",
+    },{
+        title: "خبر ۴",
+        image_url: "http://localhost:8081/image/news4.png",
+        redirect_url: "http://localhost:7777/blog/4",
+    }]}); 
 };
 
 
 const suggestOriginDestination = async ({request: {name}}, callback) => {
     try {
-        const query = {
-            text: 'select * from origin_destination '
-            + 'where city ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'or county ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'or airport ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'or iata ILIKE CONCAT(\'%\', cast($1 as text), \'%\') '
-            + 'limit 10',
-            values: [name],
-        };
-        const { rows } = await db.query(query);
+        const { rows } = await db.queryIndex('SuggestOriginDestination', name);
         if (rows.length !== 0) {
             callback(null, { list: rows}); 
         }
@@ -132,13 +162,51 @@ const suggestOriginDestination = async ({request: {name}}, callback) => {
 };
 
 function getPurchaseTitle(flight) {
-    return "پرداخت هزینه برای پرواز شماره "+flight.flight_id+", هزینه: "+flight.price;
+    return "پرداخت هزینه برای پرواز شماره "+flight.flight_serial+", هزینه: "+flight.price;
 }
 
-const buyTicket = async ({request}, callback) => {
+function makeTransaction(amount, receipt_id) {
+    const tracking_code = uuid();
+    return new Promise(function (resolve, reject) {
+      request.post('http://bank:8080/transaction/', { 
+        json: { 
+            amount,
+            receipt_id,
+            callback: 'http://localhost:8081/payment/callback/' + tracking_code
+        }
+    }, function (error, res, body) {
+        if (!error && res.statusCode === 201) {
+          resolve({...body, tracking_code});
+        } else {
+          reject(error);
+        }
+      });
+    });
+}
+
+async function getTicketData(row) {
+    const flight = await getFlightDataWithSerial(row.flight_serial, row.offer_class);
+    return {
+        transaction_id: row.transaction_id, 
+        flight, 
+        passengers: [{
+            name: row.first_name,
+            family: row.last_name,
+        }],
+        payment_url: row.transaction_result === 1 ? undefined : "http://localhost:8080/payment/" + row.transaction_id + "/",
+    };
+}
+
+async function getTicket(tracking_code) {
+    const {rows} = await db.queryIndex('PurchaseByTrackingCode', tracking_code);
+    if(rows.length===0){
+        return null;
+    }
+    return getTicketData(rows[0]);
+}
+
+const createTicket = async ({request: {user_id, flight_id, class_name, passengers}}, callback) => {
     try {
-        const {user_id, flight_id, class_name, passengers} = request;
-        console.log(request);
         const flight = await getFlightData(flight_id, class_name, passengers.length);
         if (flight === null){
             return callback({
@@ -146,7 +214,9 @@ const buyTicket = async ({request}, callback) => {
                 details: "Not Found"
             });
         }
-        console.log("AJAABB", flight);
+        const flight_serial = await getFlightSerial(flight.flight_id);
+
+        const {id: transaction_id, tracking_code} = await makeTransaction(flight.price, flight_serial);
         const query = {
             text: 'insert into purchase ('
                 + 'corresponding_user_id,'
@@ -155,21 +225,87 @@ const buyTicket = async ({request}, callback) => {
                 + 'last_name,'
                 + 'flight_serial,'
                 + 'offer_price,'
-                + 'offer_class'
-            + ') values ($1, $2, $3, $4, $5, $6, $7)',
+                + 'offer_class,'
+                + 'transaction_id,'
+                + 'tracking_code'
+            + ') values ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
             values: [
                 user_id,
                 getPurchaseTitle(flight), 
                 passengers[0].name, 
                 passengers[0].family, 
-                parseInt(flight.flight_id, 16), 
+                flight_serial, 
                 flight.price, 
                 flight.class_name,
+                transaction_id,
+                tracking_code,
             ],
+            dirtyIndexes: [{
+                index: 'PurchaseByTrackingCode',
+                values: [tracking_code],
+            },{
+                index: 'PurchaseByUserId',
+                values: [user_id],
+            }]
         };
-        const {rowCount} = await db.query(query);
+        const {rowCount} = await db.insert(query);
         if (rowCount === 1) {
-            callback(null, {flight: flight, passengers: [passengers[0]]}); 
+            callback(null, await getTicket(tracking_code)); 
+        }
+        else {
+            callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            })
+        }
+    } catch(e) {
+        console.log(e);
+        callback(e);
+    }
+};
+
+
+const parchase = async ({request: {tracking_code, status}}, callback) => {
+    try {
+        const query = {
+            text: 'update purchase set transaction_result = $1 where (tracking_code = $2)',
+            values: [
+                status,
+                tracking_code, 
+            ],
+            dirtyIndexes: [{
+                index: 'PurchaseByTrackingCode',
+                values: [tracking_code],
+            },{
+                index: 'PurchaseByUserId'
+            }]
+        };
+        const {rowCount} = await db.update(query);
+        if (rowCount === 1) {
+            callback(null, await getTicket(tracking_code)); 
+        }
+        else {
+            callback({
+                code: grpc.status.NOT_FOUND,
+                details: "Not Found"
+            })
+        }
+    } catch(e) {
+        console.log(e);
+        callback(e);
+    }
+};
+
+
+const getUsersTickets = async ({request: {user_id}}, callback) => {
+    try {
+        const {rows} = await db.queryIndex('PurchaseByUserId', user_id);
+        if (rows.length !== 0) {
+            const list = [];
+            for(const r of rows){
+                list.push(await getTicketData(r));
+            }
+            callback(null, {list}); 
         }
         else {
             callback({
@@ -187,202 +323,7 @@ module.exports = {
     searchFlights,
     getNews,
     suggestOriginDestination,
-    buyTicket,
+    createTicket,
+    parchase,
+    getUsersTickets,
 };
-
-/*
-
-// grpc.status
-// {
-//     OK: 0,
-//     CANCELLED: 1,
-//     UNKNOWN: 2,
-//     INVALID_ARGUMENT: 3,
-//     DEADLINE_EXCEEDED: 4,
-//     NOT_FOUND: 5,
-//     ALREADY_EXISTS: 6,
-//     PERMISSION_DENIED: 7,
-//     RESOURCE_EXHAUSTED: 8,
-//     FAILED_PRECONDITION: 9,
-//     ABORTED: 10,
-//     OUT_OF_RANGE: 11,
-//     UNIMPLEMENTED: 12,
-//     INTERNAL: 13,
-//     UNAVAILABLE: 14,
-//     DATA_LOSS: 15,
-//     UNAUTHENTICATED: 16
-// }
-
-const create = async ({ request }, callback) => {
-    const id = require('crypto').randomBytes(10).toString('hex');
-    const sql = "INSERT INTO products(id, price_in_cents, title, description, discount.pct, discount.value_in_cents) VALUES($1, $2, $3, $4, $5, $6)";
-
-    const { price_in_cents, title, description, pct } = request;
-    const value_in_cents = Math.ceil(price_in_cents * pct); // Type match for int
-    const query = {
-        text: sql,
-        values: [id, price_in_cents, title, description, pct, value_in_cents],
-    };
-
-    console.log(request);
-
-    try {
-        const { rowCount } = await db.query(query);
-
-        if (rowCount === 1){
-            console.log(`Create ${rowCount} product with id(${id}).`);
-            callback(null, {
-                id,
-                price_in_cents,
-                title,
-                description,
-                discount: {
-                    pct,
-                    value_in_cents,
-                }
-            });
-        } else {
-            callback({
-                code: grpc.status.CANCELLED,
-                details: "CANCELLED",
-            })
-
-            // This goes to catch part
-            // callback({
-            //     code: grpc.status.ALREADY_EXISTS,
-            //     details: "ALREADY EXISTS",
-            // })
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const update = async ({ request }, callback) => {
-    const { id, price_in_cents, title, description, pct } = request;
-    const sql = "UPDATE products SET price_in_cents = $1, title = $2, description = $3, discount.pct = $4, discount.value_in_cents = $5 WHERE id = $6"
-
-    const value_in_cents = Math.ceil(price_in_cents * pct);
-
-    const query = {
-        text: sql,
-        values: [price_in_cents, title, description, pct, value_in_cents, id],
-    };
-
-    try {
-        const { rowCount } = await db.query(query);
-
-        if (rowCount === 1) {
-            console.log(`Update ${rowCount} product with id(${id}).`);
-            callback(null, {
-                id,
-                price_in_cents,
-                title,
-                description,
-                discount: {
-                    pct,
-                    value_in_cents,
-                }
-            });
-        } else {
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            });
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const getProduct = async ({ request }, callback) => {
-    const { id } = request;
-
-    const sql = 'SELECT * FROM products WHERE id = $1';
-    const query = {
-        text: sql,
-        values: [id],
-    };
-
-    try {
-        const { rows } = await db.query(query);
-
-        if (rows.length !== 0) {
-            console.log("\n[GET] Product\n")
-            const product = rows[0]
-            console.log(product)
-            const payload = new GetProduct(id, product);
-
-            callback(null, payload );
-        }
-        else {
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            })
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const deleteProduct = async ({ request }, callback) => {
-    const { id } = request;
-    const sql = 'DELETE FROM products WHERE id = $1';
-    const query = {
-        text: sql,
-        values: [id],
-    };
-
-    try {
-        const { rowCount } = await db.query(query);
-        if (rowCount === 1) {
-            console.log(`Remove ${rowCount} product with id(${id}).`);
-            callback(null, {});
-        } else {
-            console.log(`There is no product with id(${id}) in database.`);
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            });
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-const deleteProducts = async (_, callback) => {
-    const sql = 'DELETE FROM products';
-    const query = {
-        text: sql,
-    };
-
-    try {
-        const { rowCount } = await db.query(query);
-        if (rowCount === 0) {
-            callback({
-                code: grpc.status.NOT_FOUND,
-                details: "Not Found"
-            })
-        } else {
-            console.log(`Remove ${rowCount} products`);
-            callback(null, {})
-        }
-    } catch (e) {
-        console.log(e);
-        callback(e);
-    }
-};
-
-module.exports = {
-    getProducts,
-    getProduct,
-    create,
-    update,
-    deleteProduct,
-    deleteProducts,
-}*/

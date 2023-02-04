@@ -1,0 +1,25 @@
+GET http://localhost:8081/suggest_origin_destination?name=tehr
+
+{
+    "ok": true,
+    "data": [
+        {
+            "county": "Iran",
+            "city": "Tehran",
+            "airport": "All airports",
+            "iata": "ALL"
+        },
+        {
+            "county": "Iran",
+            "city": "Tehran",
+            "airport": "Mehrabad International Airport",
+            "iata": "THR"
+        },
+        {
+            "county": "Iran",
+            "city": "Tehran",
+            "airport": "Imam Khomeini International Airport",
+            "iata": "IKA"
+        }
+    ]
+}

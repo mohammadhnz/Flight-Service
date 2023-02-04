@@ -4,8 +4,8 @@ const chalk = require("chalk");
 
 const ticketResolvers = require("./resolvers/ticket");
 
-const PROTO_PATH = "./typeDefs/ticket.proto";
-const options = require("./typeDefs/options");
+const PROTO_PATH = "./type_defs/ticket.proto";
+const options = require("./type_defs/options");
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, options);
 const productproto = grpc.loadPackageDefinition(packageDefinition);

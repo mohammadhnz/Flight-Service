@@ -1,0 +1,27 @@
+GET http://localhost:8081/news
+
+{
+    "ok": true,
+    "data": [
+        {
+            "title": "خبر ۱",
+            "image_url": "http://localhost:8081/image/news1.png",
+            "redirect_url": "http://localhost:7777/blog/1"
+        },
+        {
+            "title": "خبر ۲",
+            "image_url": "http://localhost:8081/image/news2.png",
+            "redirect_url": "http://localhost:7777/blog/2"
+        },
+        {
+            "title": "خبر ۳",
+            "image_url": "http://localhost:8081/image/news3.png",
+            "redirect_url": "http://localhost:7777/blog/3"
+        },
+        {
+            "title": "خبر ۴",
+            "image_url": "http://localhost:8081/image/news4.png",
+            "redirect_url": "http://localhost:7777/blog/4"
+        }
+    ]
+}

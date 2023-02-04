@@ -1,0 +1,12 @@
+This static pages are located in backend/server/static
+
+// TODO: @roya: Front url redirect pages should be changed
+
+GET http://localhost:8081/payment/callback/{tracking_code}/1
+
+output: payment success static page
+
+GET http://localhost:8081/payment/callback/{tracking_code}/{failed_statuses}
+
+output: payment failed static page
+

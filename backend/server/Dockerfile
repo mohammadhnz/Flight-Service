@@ -1,8 +1,7 @@
-FROM python:3.6
-
+FROM node:14
 WORKDIR /
 
-RUN pip install django djangorestframework
+RUN npm install
 COPY . /
 
 RUN chmod 0777 /run.sh

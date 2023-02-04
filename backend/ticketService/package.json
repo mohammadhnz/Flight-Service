@@ -10,14 +10,9 @@
     "express": "^4.17.1",
     "grpc": "^1.23.3",
     "moment": "^2.24.0",
-    "pg": "^8.0.1"
-  },
-  "devDependencies": {
-    "supertest": "^4.0.2",
-    "tape": "^4.11.0"
-  },
-  "scripts": {
-    "serve": "node main.js",
-    "test-tape": "node tests/main.js"
+    "pg": "^8.0.1",
+    "redis": "^4.6.4",
+    "request": "^2.88.2",
+    "uuid": "^9.0.0"
   }
 }

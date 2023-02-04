@@ -1,0 +1,60 @@
+Authorized User GET http://localhost:8081/ticket/list
+
+{
+    "ok": true,
+    "data": [
+        {
+            "transaction_id": 1,
+            "flight": {
+                "flight_id": "AD3E48",
+                "origin": "IND",
+                "destination": "SOU",
+                "duration": {
+                    "hours": 1,
+                    "minutes": 3,
+                    "seconds": 59
+                },
+                "price": 503,
+                "free_capacity": 15,
+                "is_limited_capacity": false,
+                "equipment": "Tupolev Tupolev Tu-214-T204",
+                "departure_local_time": 1675441801000,
+                "arrival_local_time": 1675463640000,
+                "class_name": "First Class"
+            },
+            "passengers": [
+                {
+                    "name": "علی",
+                    "family": "رضایی"
+                }
+            ],
+            "payment_url": "http://localhost:8999/payment/1/"
+        },
+        {
+            "transaction_id": 2,
+            "flight": {
+                "flight_id": "AD3E48",
+                "origin": "IND",
+                "destination": "SOU",
+                "duration": {
+                    "hours": 1,
+                    "minutes": 3,
+                    "seconds": 59
+                },
+                "price": 503,
+                "free_capacity": 15,
+                "is_limited_capacity": false,
+                "equipment": "Tupolev Tupolev Tu-214-T204",
+                "departure_local_time": 1675441801000,
+                "arrival_local_time": 1675463640000,
+                "class_name": "First Class"
+            },
+            "passengers": [
+                {
+                    "name": "علی",
+                    "family": "رضایی"
+                }
+            ]
+        }
+    ]
+}

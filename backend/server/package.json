@@ -11,13 +11,5 @@
     "grpc": "^1.23.3",
     "moment": "^2.24.0",
     "pg": "^7.12.1"
-  },
-  "devDependencies": {
-    "supertest": "^4.0.2",
-    "tape": "^4.11.0"
-  },
-  "scripts": {
-    "serve": "node main.js",
-    "test-tape": "node tests/main.js"
   }
 }

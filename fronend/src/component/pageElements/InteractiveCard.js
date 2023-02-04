@@ -1,6 +1,6 @@
 import * as React from 'react';
 import AspectRatio from '@mui/joy/AspectRatio';
-import Link from '@mui/joy/Link';
+import {Link} from "react-router-dom";
 import Card from '@mui/joy/Card';
 import Chip from '@mui/joy/Chip';
 import Typography from '@mui/joy/Typography';
@@ -27,7 +27,6 @@ export default function InteractiveCard({
                                             hour,
                                             minute,
                                             isLimited,
-                                            className,
                                             economyP,
                                             bussinessP,
                                             firstClassP
@@ -35,8 +34,14 @@ export default function InteractiveCard({
     const dep_time = new Date(departure_local_time).toJSON().slice(0, 10);
     const arr_time = new Date(arrival_local_time).toJSON().slice(0, 10);
     const navigate = useNavigate();
-    const handleClick = (event) => {
-        navigate('/about')
+    const handleClickF = (event) => {
+        //navigate('/about')
+    }
+    const handleClickB = (event) => {
+        //navigate('/about')
+    }
+    const handleClickE = (event) => {
+        //navigate('/about')
     }
     return (
         <Card
@@ -53,7 +58,7 @@ export default function InteractiveCard({
             </AspectRatio>
             <div>
                 <Typography level="h2" fontSize="lg" id="card-description" sx={{fontWeight: 'md'}}>
-                    از {origin} به  {destination}
+                    از {origin} به {destination}
                 </Typography>
 
                 <Typography level="h2" fontSize="lg" id="card-description" sx={{fontWeight: 'md'}}>
@@ -69,22 +74,30 @@ export default function InteractiveCard({
                           alignItems="center"
                           item xs={4}
                     >
-                        <BoxComponent textAlign="center" className="Economy" classP={economyP}/>
+                        <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickE}>
+                            Economy
+                            <br/>
+                            ${economyP}
+                        </Button>
                     </Grid>
-                    <Grid container
-                          justifyContent="center"
-                          alignItems="center"
-                          item xs={4}>
-                        <BoxComponent  textAlign="center" className="Business" classP={bussinessP}/>
+                    <Grid container justifyContent="center" alignItems="center" item xs={4}>
+                        <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickB}>
+                            Business
+                            <br/>
+                            ${bussinessP}
+                        </Button>
                     </Grid>
-                    <Grid container justifyContent="center"
-                          alignItems="center"
-                          item xs={4}>
-                        <BoxComponent onClick={handleClick} textAlign="center" className="First Class" classP={firstClassP}/>
+                    <Grid container justifyContent="center" alignItems="center" item xs={4}>
+                        <Link to="/buy" state={{from: firstClassP, passNum: 4}}>
+                            <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickF}>
+                                First Class
+                                ${firstClassP}
+                            </Button>
+                        </Link>
                     </Grid>
                 </Grid>
                 {isLimited && (
-                    <div className="text-danger" style={{color:"red"}}>ظرفیت محدود است</div>
+                    <div className="text-danger" style={{color: "red"}}>ظرفیت محدود است</div>
                 )}
                 {/*<Button variant="outlined" className="btn btn-primary">*/}
                 {/*    <Link*/}

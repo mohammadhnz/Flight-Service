@@ -10,16 +10,19 @@ import About from "./pages/About";
 import DrawerAppBar from "./component/pageElements/DrawerAppBar";
 import SignUp from "./pages/SignUp";
 import FlightsList from "./pages/FlightsList";
+import BuyTicket from "./pages/BuyTicket";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Home/>}/>
+                <Route exact path="/" element={<Home/>}/>
                 <Route path="/sign-in" element={<SignIn/>}/>
                 <Route path="/about" element={<About/>}/>
                 <Route path="/sign-up" element={<SignUp/>}/>
                 <Route path="/flights" element={<FlightsList/>}/>
+                <Route exact path="/buy" element={<BuyTicket/>}/>
+                <Route path="/buy/:from" element={<BuyTicket/>}/>
             </Routes>
         </BrowserRouter>
     );

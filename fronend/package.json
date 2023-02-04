@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
+    "@hookform/resolvers": "^2.9.10",
     "@material-ui/core": "^4.12.4",
     "@mui/icons-material": "^5.11.0",
     "@mui/joy": "*",
@@ -13,6 +14,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "autosuggest-highlight": "^3.3.4",
+    "bootstrap": "^5.2.3",
     "country-list": "^2.3.0",
     "rc-input-number": "^7.4.0",
     "react": "^18.2.0",
@@ -27,7 +29,8 @@
     "react-router-dom": "^6.8.0",
     "react-scripts": "5.0.1",
     "rmc-input-number": "^1.0.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",

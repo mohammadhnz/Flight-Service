@@ -1,86 +1,177 @@
 [
-  {
-    "flight_id": "B7364F",
-    "origin": "CAI",
-    "destination": "YQM",
-    "duration": {
-      "hours": 1,
-      "minutes": 25,
-      "seconds": 11
-    },
-    "price": {
-      "Business": 100,
-      "Economy": 50,
-      "First_Class": 200
-    },
-    "free_capacity": 768,
-    "is_limited_capacity": false,
-    "equipment": "Airbus SAS Airbus A380-A388",
-    "departure_local_time": 1675431174000,
-    "arrival_local_time": 1675414685000,
-    "class_name": "Business"
-  },
-  {
-    "flight_id": "B7364F",
-    "origin": "CAI",
-    "destination": "YQM",
-    "duration": {
-      "hours": 1,
-      "minutes": 25,
-      "seconds": 2
-    },
-    "price": {
-      "Business": 100,
-      "Economy": 50,
-      "First_Class": 200
-    },
-    "free_capacity": 50,
-    "is_limited_capacity": true,
-    "equipment": "Airbus SAS Airbus A380-A388",
-    "departure_local_time": 1675431174000,
-    "arrival_local_time": 1675414685000,
-    "class_name": "Economy"
-  },
-  {
-    "flight_id": "B7364F",
-    "origin": "CAI",
-    "destination": "YQM",
-    "duration": {
-      "hours": 1,
-      "minutes": 10,
-      "seconds": 11
-    },
-    "price": {
-      "Business": 100,
-      "Economy": 50,
-      "First_Class": 200
-    },
-    "free_capacity": 35,
-    "is_limited_capacity": false,
-    "equipment": "Airbus SAS Airbus A380-A388",
-    "departure_local_time": 1675431174000,
-    "arrival_local_time": 1675414685000,
-    "class_name": "First Class"
-  },
-    {
-    "flight_id": "B7364F",
-    "origin": "CAI",
-    "destination": "YQM",
-    "duration": {
-      "hours": 1,
-      "minutes": 25,
-      "seconds": 2
-    },
-    "price": {
-      "Business": 100,
-      "Economy": 50,
-      "First_Class": 200
-    },
-    "free_capacity": 50,
-    "is_limited_capacity": true,
-    "equipment": "Airbus SAS Airbus A380-A388",
-    "departure_local_time": 1675431174000,
-    "arrival_local_time": 1675414685000,
-    "class_name": "Economy"
-  }
+{
+            "flight_id": "1B34ED",
+            "origin": "CAI",
+            "destination": "DEN",
+            "duration": {
+                "hours": 4,
+                "minutes": 28,
+                "seconds": 18
+            },
+            "y_price": 50,
+            "j_price": 156,
+            "f_price": 440,
+            "y_class_free_capacity": 107,
+            "j_class_free_capacity": 20,
+            "f_class_free_capacity": 45,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": false,
+            "f_is_limited_capacity": false,
+            "equipment": "The Boeing Company Boeing 737 Max 7-B37M",
+            "departure_local_time": 1675386886000,
+            "arrival_local_time": 1675370584000
+        },
+        {
+            "flight_id": "68C5FC",
+            "origin": "CAI",
+            "destination": "ENU",
+            "duration": {
+                "hours": 5,
+                "minutes": 28,
+                "seconds": 21
+            },
+            "y_price": 99,
+            "j_price": 255,
+            "f_price": 575,
+            "y_class_free_capacity": 407,
+            "j_class_free_capacity": 30,
+            "f_class_free_capacity": 30,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": false,
+            "f_is_limited_capacity": false,
+            "equipment": "The Boeing Company Boeing 747-8-B748",
+            "departure_local_time": 1675384069000,
+            "arrival_local_time": 1675400170000
+        },
+        {
+            "flight_id": "172CDF",
+            "origin": "CAI",
+            "destination": "IXA",
+            "duration": {
+                "hours": 2,
+                "minutes": 50,
+                "seconds": 56
+            },
+            "y_price": 120,
+            "j_price": 212,
+            "f_price": 489,
+            "y_class_free_capacity": 82,
+            "j_class_free_capacity": 20,
+            "f_class_free_capacity": 15,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": false,
+            "f_is_limited_capacity": false,
+            "equipment": "The Boeing Company Boeing 717-200-B712",
+            "departure_local_time": 1675369838000,
+            "arrival_local_time": 1675392694000
+        },
+        {
+            "flight_id": "204E60",
+            "origin": "CAI",
+            "destination": "KMQ",
+            "duration": {
+                "hours": 9,
+                "minutes": 19,
+                "seconds": 17
+            },
+            "y_price": 50,
+            "j_price": 150,
+            "f_price": 584,
+            "y_class_free_capacity": 100,
+            "j_class_free_capacity": 0,
+            "f_class_free_capacity": 30,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": true,
+            "f_is_limited_capacity": false,
+            "equipment": "The Boeing Company Boeing 737-600-B736",
+            "departure_local_time": 1675395815000,
+            "arrival_local_time": 1675454572000
+        },
+        {
+            "flight_id": "4C4833",
+            "origin": "CAI",
+            "destination": "OMS",
+            "duration": {
+                "hours": 4,
+                "minutes": 17,
+                "seconds": 38
+            },
+            "y_price": 109,
+            "j_price": 258,
+            "f_price": 552,
+            "y_class_free_capacity": 306,
+            "j_class_free_capacity": 35,
+            "f_class_free_capacity": 40,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": false,
+            "f_is_limited_capacity": false,
+            "equipment": "The Boeing Company Boeing 787-8 Dreamliner-B788",
+            "departure_local_time": 1675423799000,
+            "arrival_local_time": 1675453657000
+        },
+        {
+            "flight_id": "3E65AE",
+            "origin": "CAI",
+            "destination": "SDR",
+            "duration": {
+                "minutes": 48,
+                "seconds": 23
+            },
+            "y_price": 119,
+            "j_price": 285,
+            "f_price": 304,
+            "y_class_free_capacity": 79,
+            "j_class_free_capacity": 0,
+            "f_class_free_capacity": 45,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": true,
+            "f_is_limited_capacity": false,
+            "equipment": "Embraer (Empresa Brasileira de Aeronáutica SA) Embraer E195-E195",
+            "departure_local_time": 1675380313000,
+            "arrival_local_time": 1675379616000
+        },
+        {
+            "flight_id": "9904DD",
+            "origin": "CAI",
+            "destination": "TFU",
+            "duration": {
+                "hours": 6,
+                "minutes": 45,
+                "seconds": 25
+            },
+            "y_price": 94,
+            "j_price": 188,
+            "f_price": 526,
+            "y_class_free_capacity": 55,
+            "j_class_free_capacity": 30,
+            "f_class_free_capacity": 20,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": false,
+            "f_is_limited_capacity": false,
+            "equipment": "Commercial Aircraft Corporation of China Ltd Comac ARJ21 Xiangfeng-AJ27",
+            "departure_local_time": 1675392996000,
+            "arrival_local_time": 1675438921000
+        },
+        {
+            "flight_id": "B7364F",
+            "origin": "CAI",
+            "destination": "YQM",
+            "duration": {
+                "hours": 1,
+                "minutes": 25,
+                "seconds": 11
+            },
+            "y_price": 149,
+            "j_price": 289,
+            "f_price": 519,
+            "y_class_free_capacity": 768,
+            "j_class_free_capacity": 50,
+            "f_class_free_capacity": 35,
+            "y_is_limited_capacity": false,
+            "j_is_limited_capacity": false,
+            "f_is_limited_capacity": false,
+            "equipment": "Airbus SAS Airbus A380-A388",
+            "departure_local_time": 1675431174000,
+            "arrival_local_time": 1675414685000
+        }
 ]

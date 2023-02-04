@@ -10,6 +10,7 @@ import Ticket from "../component/forms/Ticket";
 
 function Flight() {
     const flightsData = flights;
+    const isLimited = false;
     return (
         <div className=" rmdp-rtl">
             <DrawerAppBar/>
@@ -23,9 +24,10 @@ function Flight() {
                                          departure_local_time={flight.departure_local_time}
                                          arrival_local_time={flight.arrival_local_time}
                                          hour={flight.duration.hours} minute={flight.duration.minutes}
-                                         isLimited={flight.is_limited_capacity} className={flight.class_name}
-                                         bussinessP={flight.price.Business} economyP={flight.price.Economy}
-                                         firstClassP={flight.price.First_Class}
+                                         bussinessP={flight.j_price} economyP={flight.y_price}
+                                         firstClassP={flight.f_price}
+                                         isLimited={isLimited}
+
                         />
                     </>
                 ))}

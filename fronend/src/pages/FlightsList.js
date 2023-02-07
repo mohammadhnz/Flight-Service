@@ -41,7 +41,7 @@ function Flight() {
     return (
         <div className=" rmdp-rtl">
             <DrawerAppBar/>
-            <Grid center sx={{height: '55vh'}}>
+            <Grid center sx={{height: '70vh'}}>
                 <Ticket/>
             </Grid>
             <Grid container justifyContent="center">

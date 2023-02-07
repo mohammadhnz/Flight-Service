@@ -7,6 +7,7 @@ import {yupResolver} from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import {useForm, useFieldArray} from 'react-hook-form'
 import Grid from "@mui/material/Grid";
+import DrawerAppBar from "../component/pageElements/DrawerAppBar";
 
 function BuyTicket() {
     const location = useLocation()
@@ -81,7 +82,8 @@ function BuyTicket() {
     );
     return (
         <div className=" rmdp-rtl">
-            <Grid justifyContent="center">
+            <DrawerAppBar/>
+            <Grid item>
                 <Card>{card}</Card>
             </Grid>
             <Grid container justifyContent="center">

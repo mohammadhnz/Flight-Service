@@ -17,6 +17,10 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import SignUp from "../../pages/SignUp";
 import FlightsList from "../../pages/FlightsList";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/joy/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
 
 
 function Ticket() {
@@ -146,127 +150,145 @@ function Ticket() {
 
     return (
         <>
-            <form className="data-form classes.root" onSubmit={handleSubmit(PrivateRoute)}>
-                <label htmlFor="from-field">
-                    از
-                    <Autocomplete
-                        {...defaultProps}
-                        autoHighlight
-                        renderInput={(params) => (
-                            <TextField {...params} {...register("from")} placeholder="from" id="from-field"
-                                       variant="standard"/>
-                        )}
-                    />
-                </label>
-                <label htmlFor="to-field">
-                    به
-                    <Autocomplete
-                        {...defaultProps}
-                        autoHighlight
-                        renderInput={(params) => (
-                            <TextField {...params} {...register("to")} placeholder="to" id="to-field"
-                                       variant="standard"/>
-                        )}
-                    />
-                </label>
-
-                <RadioGroup row aria-label="way" name="return_status" value={ratioValStatus}
-                            onChange={handleRaitoStatusChange}>
-                    <FormControlLabel value="around"
-                                      control={<Radio id="field-around" {...register("return_status")}/>}
-                                      label="رفت و برگشت"/>
-                    <FormControlLabel value="oneway"
-                                      control={<Radio id="field-oneway" {...register("return_status")}/>}
-                                      label="یک طرفه"/>
-                </RadioGroup>
-
-                <Controller
-                    control={control}
-                    name="retDate"
-                    rules={{required: true}} //optional
-                    render={({
-                                 field: {onChange, name, value},
-                                 fieldState: {invalid, isDirty}, //optional
-                                 formState: {errors}, //optional, but necessary if you want to show an error message
-                             }) => (
-                        <>
-                            <DatePicker
-                                value={value || ""}
-                                onChange={(date) => {
-                                    onChange(date?.isValid ? date : "");
-                                }}
-                                calendar={persian}
-                                locale={persian_fa}
-                                calendarPosition="bottom-right"
-                                format={"YYYY/MM/DD"}
-
-                                containerStyle={{
-                                    marginLeft: '1.5rem'
-                                }}
+            <Grid container justifyContent="center">
+                <Card
+                    variant="outlined"
+                    orientation="horizontal"
+                    sx={{
+                        width: 400,
+                        gap: 1,
+                        '&:hover': {boxShadow: 'md', borderColor: 'neutral.outlinedHoverBorder'},
+                    }}
+                ><CardContent>
+                    <form className="data-form classes.root" onSubmit={handleSubmit(PrivateRoute)}>
+                        <label htmlFor="from-field">
+                            از
+                            <Autocomplete
+                                {...defaultProps}
+                                autoHighlight
+                                renderInput={(params) => (
+                                    <TextField {...params} {...register("from")} placeholder="from" id="from-field"
+                                               variant="standard"/>
+                                )}
                             />
-                            {errors && errors[name] && errors[name].type === "required" && (
-                                //if you want to show an error message
-                                <span>your error message !</span>
-                            )}
-                        </>
-                    )}
-                />
-                <Controller
-                    control={control}
-                    name="leftDate"
-                    rules={{required: true}} //optional
-                    render={({
-                                 field: {onChange, name, value},
-                                 fieldState: {invalid, isDirty}, //optional
-                                 formState: {errors}, //optional, but necessary if you want to show an error message
-                             }) => (
-                        <>
-                            <DatePicker
-                                value={value || ""}
-                                onChange={(date) => {
-                                    onChange(date?.isValid ? date : "");
-                                }}
-                                calendar={persian}
-                                locale={persian_fa}
-                                calendarPosition="bottom-right"
-                                format={"YYYY/MM/DD"}
+                        </label>
+                        <label htmlFor="to-field">
+                            به
+                            <Autocomplete
+                                {...defaultProps}
+                                autoHighlight
+                                renderInput={(params) => (
+                                    <TextField {...params} {...register("to")} placeholder="to" id="to-field"
+                                               variant="standard"/>
+                                )}
                             />
-                            {errors && errors[name] && errors[name].type === "required" && (
-                                //if you want to show an error message
-                                <span>your error message !</span>
+                        </label>
+
+                        <RadioGroup row aria-label="way" name="return_status" value={ratioValStatus}
+                                    onChange={handleRaitoStatusChange}>
+                            <FormControlLabel value="around"
+                                              control={<Radio id="field-around" {...register("return_status")}/>}
+                                              label="رفت و برگشت"/>
+                            <FormControlLabel value="oneway"
+                                              control={<Radio id="field-oneway" {...register("return_status")}/>}
+                                              label="یک طرفه"/>
+                        </RadioGroup>
+                        <Controller
+                            control={control}
+                            name="retDate"
+                            rules={{required: true}} //optional
+                            render={({
+                                         field: {onChange, name, value},
+                                         fieldState: {invalid, isDirty}, //optional
+                                         formState: {errors}, //optional, but necessary if you want to show an error message
+                                     }) => (
+                                <>
+                                    <Typography sx={{fontSize: 14}} color="text.secondary">
+                                        تاریخ رفت:
+                                    </Typography>
+                                    <DatePicker
+                                        value={value || ""}
+                                        onChange={(date) => {
+                                            onChange(date?.isValid ? date : "");
+                                        }}
+                                        calendar={persian}
+                                        locale={persian_fa}
+                                        calendarPosition="bottom-right"
+                                        format={"YYYY/MM/DD"}
+
+                                        containerStyle={{
+                                            marginLeft: '1.5rem'
+                                        }}
+                                    />
+                                    {errors && errors[name] && errors[name].type === "required" && (
+                                        //if you want to show an error message
+                                        <span>your error message !</span>
+                                    )}
+                                </>
                             )}
-                        </>
-                    )}
-                />
-                <div>
-                    <label htmlFor="passNum">تعداد مسافران</label>
-                    <div style={{display: 'inline-block'}}>
-                        <IconButton aria-label="plus" size="large" onClick={upPassNum}>+</IconButton>
-                        <input style={{width: '25ch',}}
-                               variant="standard" {...register("passNum", {required: true})}
-                               value={passNum}
-                               onChange={handlePasNumChange}/>
-                        <IconButton aria-label="plus" size="large" onClick={downPassNum}>-</IconButton>
-                    </div>
-                </div>
-                <br/>
-                <RadioGroup row aria-label="classNames" name="class_name" value={ratioVal}
-                            onChange={handleRatioChange}>
-                    <FormControlLabel value="buisiness"
-                                      control={<Radio id="field-around" {...register("class_name")}/>}
-                                      label="بیزینس"/>
-                    <FormControlLabel value="economy"
-                                      control={<Radio id="field-oneway" {...register("class_name")}/>}
-                                      label="اکونومی"/>
-                    <FormControlLabel value="firstClass"
-                                      control={<Radio id="field-oneway" {...register("class_name")}/>}
-                                      label="فرست کلاس"/>
-                </RadioGroup>
-                <br/>
-                <Button variant="outlined" type="submit" className="btn btn-primary">
-                    Send
-                </Button>
-            </form>
+                        />
+                        <Controller
+                            control={control}
+                            name="leftDate"
+                            rules={{required: true}} //optional
+                            render={({
+                                         field: {onChange, name, value},
+                                         fieldState: {invalid, isDirty}, //optional
+                                         formState: {errors}, //optional, but necessary if you want to show an error message
+                                     }) => (
+                                <>
+                                    <Typography sx={{fontSize: 14}} color="text.secondary" >
+                                        تاریخ برگشت:
+                                    </Typography>
+                                    <DatePicker
+                                        value={value || ""}
+                                        onChange={(date) => {
+                                            onChange(date?.isValid ? date : "");
+                                        }}
+                                        calendar={persian}
+                                        locale={persian_fa}
+                                        calendarPosition="bottom-right"
+                                        format={"YYYY/MM/DD"}
+                                    />
+                                    {errors && errors[name] && errors[name].type === "required" && (
+                                        //if you want to show an error message
+                                        <span>your error message !</span>
+                                    )}
+                                </>
+                            )}
+                        />
+                        <div>
+                            <label htmlFor="passNum">تعداد مسافران</label>
+                            <div style={{display: 'inline-block'}}>
+                                <IconButton aria-label="plus" size="large" onClick={upPassNum}>+</IconButton>
+                                <input style={{width: '8ch',}}
+                                       variant="standard" {...register("passNum", {required: true})}
+                                       value={passNum}
+                                       onChange={handlePasNumChange}/>
+                                <IconButton aria-label="plus" size="large" onClick={downPassNum}>-</IconButton>
+                            </div>
+                        </div>
+                        <br/>
+                        <RadioGroup row aria-label="classNames" name="class_name" value={ratioVal}
+                                    onChange={handleRatioChange}>
+                            <FormControlLabel value="buisiness"
+                                              control={<Radio id="field-around" {...register("class_name")}/>}
+                                              label="بیزینس"/>
+                            <FormControlLabel value="economy"
+                                              control={<Radio id="field-oneway" {...register("class_name")}/>}
+                                              label="اکونومی"/>
+                            <FormControlLabel value="firstClass"
+                                              control={<Radio id="field-oneway" {...register("class_name")}/>}
+                                              label="فرست کلاس"/>
+                        </RadioGroup>
+                        <br/>
+                        <Button variant="outlined" type="submit" className="btn btn-primary">
+                            Send
+                        </Button>
+                    </form>
+                </CardContent>
+                </Card>
+            </Grid>
         </>
     )
 }

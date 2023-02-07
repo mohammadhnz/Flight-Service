@@ -14,6 +14,7 @@ import Box from "@mui/material/Box";
 import BoxComponent from "../buttonbases/BoxComponent";
 import {useNavigate} from "react-router-dom";
 import flights from "../../static/flights.json";
+import Avatar from "@mui/material/Avatar";
 
 function Item(props) {
     return null;
@@ -56,9 +57,14 @@ export default function InteractiveCard({
                 '&:hover': {boxShadow: 'md', borderColor: 'neutral.outlinedHoverBorder'},
             }}
         >
-            <AspectRatio ratio="1" sx={{width: 80}}>
-                <img src={airplane} loading="lazy" alt=""/>
-            </AspectRatio>
+            {/*<AspectRatio ratio="1" sx={{width: 80}}>*/}
+            {/*    <img src={airplane} loading="lazy" alt=""/>*/}
+            {/*</AspectRatio>*/}
+            <Avatar
+                alt="airplane"
+                src={airplane}
+                sx={{width: 56, height: 56}}
+            />
             <div>
                 <Typography level="h2" fontSize="lg" id="card-description" sx={{fontWeight: 'md'}}>
                     از {origin} به {destination}

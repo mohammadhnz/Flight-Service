@@ -1,5 +1,4 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -17,9 +16,12 @@ import Button from '@mui/material/Button';
 import {Link} from "@mui/material";
 import {useNavigate} from "react-router-dom";
 import About from "../../pages/About";
+import { red } from '@mui/material/colors';
+import {MuiThemeProvider} from "@material-ui/core";
+import theme from "../Theme";
 
 const drawerWidth = 240;
-const navItems = ['Home', 'About', 'Contact'];
+const navItems = ['ثبت نام', 'ورود', 'تماس با ما'];
 
 function DrawerAppBar(props) {
     const {window} = props;
@@ -32,7 +34,7 @@ function DrawerAppBar(props) {
     const navigate = useNavigate();
 
     function handleClick() {
-        navigate("/about");
+        navigate("/sign-up");
     }
 
     const drawer = (
@@ -54,12 +56,12 @@ function DrawerAppBar(props) {
     const container = window !== undefined ? () => window().document.body : undefined;
 
     return (
-        <Box sx={{display: 'flex'}}>
-            <CssBaseline/>
-            <AppBar component="nav">
+        <Box sx={{display: 'flex', flexGrow: 1}}>
+            <MuiThemeProvider theme={theme}/>
+            <AppBar component="nav" style={{ background: '#37373b' }}>
                 <Toolbar>
                     <IconButton
-                        color="inherit"
+                        color="#fff"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}

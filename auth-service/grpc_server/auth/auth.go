@@ -94,9 +94,18 @@ func (s *Server) UserInfo(ctx context.Context, userInfoData *UserInfoData) (*Use
 		"received signup request from client: access_token: %s refresh_token: %s",
 		userInfoData.AccessToken, userInfoData.RefreshToken,
 	)
-	//claims, user, err := utils.ExtractJwtToken(signOutData.AccessToken)
-	//if err != nil {
-	//	return &UserInfoResponse{Status: UserInfoResponse_AUTHORIZATION_ERROR_401}, nil
-	//}
-	return &UserInfoResponse{Status: UserInfoResponse_OK_200}, nil
+	_, user, err := utils.ExtractJwtToken(userInfoData.AccessToken)
+	if err != nil {
+		return &UserInfoResponse{Status: UserInfoResponse_AUTHORIZATION_ERROR_401}, nil
+	}
+	return &UserInfoResponse{
+		Status: UserInfoResponse_OK_200,
+		User: &UserData{
+			FirstName:   user.First_name,
+			LastName:    user.Last_name,
+			PhoneNumber: user.Phone_number,
+			Email:       user.Email,
+			Gender:      user.Gender,
+		},
+	}, nil
 }

@@ -4,103 +4,57 @@ import (
 	"awesomeProject/config"
 	"awesomeProject/middleware"
 	"awesomeProject/models"
+	"awesomeProject/repository"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"os"
 	"time"
 )
 
+func ReturnError(c *gin.Context, status int, message string) {
+	c.JSON(status, gin.H{
+		"error": message,
+	})
+}
 func SignUp(c *gin.Context) {
-	var buser struct {
-		Email        string
-		Phone_number string
-		Gender       string
-		First_name   string
-		Last_name    string
-		Password     string
-	}
+	var buser repository.UserData
 	if c.Bind(&buser) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
-		})
+		ReturnError(c, http.StatusBadRequest, "Failed to read body")
 		return
 	}
-
-	//hash password
-	hash, err := bcrypt.GenerateFromPassword([]byte(buser.Password), 10)
+	user, err := repository.CreateUser(buser)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body" + err.Error(),
-		})
+		ReturnError(c, http.StatusBadRequest, "Failed to create user. Duplicate User")
 		return
 	}
-	user := models.User{
-		Email:         buser.Email,
-		Phone_number:  buser.Phone_number,
-		Gender:        buser.Gender,
-		First_name:    buser.First_name,
-		Last_name:     buser.Last_name,
-		Password_hash: string(hash),
-	}
-	result := config.DB.Create(&user)
 
-	if result.Error != nil {
-		c.JSON(http.StatusConflict, gin.H{
-			"error": "Failed to create",
-		})
-		return
-	}
 	c.JSON(http.StatusCreated, gin.H{
-		"ok": "user created",
+		"user_data": user,
 	})
 }
 
 func SignIn(c *gin.Context) {
-	var body struct {
-		Email        string
-		Phone_number string
-		Password     string
-	}
+	var body repository.GetUserData
 	if c.Bind(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
-		})
-		return
-	}
-	var user models.User
-	config.DB.Where("email = ? OR phone_number = ?", body.Email, body.Phone_number).First(&user)
-	if user.User_id == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no user with given information"})
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password_hash), []byte(body.Password))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "no user with given information",
-		})
+		ReturnError(c, http.StatusBadRequest, "Failed to read body")
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.User_id,
-		"exp": time.Now().Add(time.Hour * 1).Unix(),
-	})
-	tokenString, err := token.SignedString(
-		[]byte(os.Getenv("SECRET")),
-	)
+	user, err := repository.GetUser(body)
+	if err != nil {
+		ReturnError(c, http.StatusForbidden, "Wrong user or password")
+		return
+	}
+
+	tokenString, err := GenerateToken(user)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to create token",
-		})
+		ReturnError(c, http.StatusBadRequest, "failed to create token")
 		return
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{"Yoo": "Yooo"})
 }
 
 func SignOut(c *gin.Context) {

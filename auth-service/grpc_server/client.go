@@ -17,19 +17,39 @@ func main() {
 	defer conn.Close()
 
 	c := authorization.NewAuthenticationClient(conn)
+	//
+	//signupData := authorization.SignupData{
+	//	PhoneNumber: "0933041sdf2310360",
+	//	Email:       "dfsdfsdfsdfsdf@gmail.com",
+	//	Password:    "Ali is near 999",
+	//	Gender:      authorization.SignupData_WOMEN,
+	//	FirstName:   "Mohammad123ali",
+	//	LastName:    "Hossein123nezhad",
+	//}
+	//_, err = c.Signup(context.Background(), &signupData)
+	//if err != nil {
+	//	log.Printf("Could not sign up: %s", err)
+	//}
+	//
+	//signInData := authorization.SignInData{
+	//	PhoneNumber: "0933041sdf2310360",
+	//	Email:       "dfsdfsdfsdfsdf@gmail.com",
+	//	Password:    "Ali is near 999",
+	//}
 
-	signupData := authorization.SignupData{
-		PhoneNumber: "09330410360",
-		Email:       "hmohammadali2013@gmail.com",
-		Password:    "Ali is near 999",
-		Gender:      authorization.SignupData_WOMEN,
-		FirstName:   "Mohammadali",
-		LastName:    "Hosseinnezhad",
+	signOutData := authorization.SignOutData{
+		AccessToken:  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzU3NzQ1MjMsInN1YiI6MTl9.c7MW30A1XK25IOGE3oFdBoSCHT7TgaSu7gW83eecWJw",
+		RefreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzU4MTQxMjMsInN1YiI6MTl9.7kWka0V6yXmOqwz2cNctut7UEDNevy0l_Bbql5UEbXI",
 	}
-	response, err := c.Signup(context.Background(), &signupData)
+	res, err := c.SignOut(context.Background(), &signOutData)
 	if err != nil {
 		log.Printf("Could not sign up: %s", err)
 	}
+	log.Println(res)
 
-	log.Printf("Response status from grpc_server: %s", response.Status)
+	//res, err := c.SignIn(context.Background(), &signInData)
+	//if err != nil {
+	//	log.Printf("Could not sign up: %s", err)
+	//}
+	//log.Println(res)
 }

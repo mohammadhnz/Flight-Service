@@ -1,11 +1,17 @@
 package main
 
 import (
+	"awesomeProject/config"
 	"awesomeProject/grpc_server/auth"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
+
+func init() {
+	config.InitializeEnvVars()
+	config.Connect()
+}
 
 func main() {
 	lis, err := net.Listen("tcp", ":9000")

@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {useNavigate} from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -29,6 +30,7 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignIn() {
+  const navigate = useNavigate();
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -36,6 +38,7 @@ export default function SignIn() {
       email: data.get('email'),
       password: data.get('password'),
     });
+    navigate("/");
   };
 
   return (
@@ -63,7 +66,7 @@ export default function SignIn() {
               fullWidth
               id="email"
               label="آدرس ایمیل"
-              // name="email"
+              name="email"
               // autoComplete="email"
               autoFocus
             />
@@ -103,7 +106,7 @@ export default function SignIn() {
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
+        {/*<Copyright sx={{ mt: 8, mb: 4 }} />*/}
       </Container>
     </ThemeProvider>
   );

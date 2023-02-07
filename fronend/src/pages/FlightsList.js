@@ -26,7 +26,7 @@ function Flight() {
                                          hour={flight.duration.hours} minute={flight.duration.minutes}
                                          bussinessP={flight.j_price} economyP={flight.y_price}
                                          firstClassP={flight.f_price}
-                                         isLimited={isLimited}
+                                         isLimited={isLimited} flightId = {flight.flight_id}
 
                         />
                     </>

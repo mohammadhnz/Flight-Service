@@ -13,6 +13,7 @@ import * as PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import BoxComponent from "../buttonbases/BoxComponent";
 import {useNavigate} from "react-router-dom";
+import flights from "../../static/flights.json";
 
 function Item(props) {
     return null;
@@ -29,11 +30,13 @@ export default function InteractiveCard({
                                             isLimited,
                                             economyP,
                                             bussinessP,
-                                            firstClassP
+                                            firstClassP,
+                                            flightId
                                         }) {
     const dep_time = new Date(departure_local_time).toJSON().slice(0, 10);
     const arr_time = new Date(arrival_local_time).toJSON().slice(0, 10);
     const navigate = useNavigate();
+    console.log(flightId)
     const handleClickF = (event) => {
         //navigate('/about')
     }
@@ -88,7 +91,13 @@ export default function InteractiveCard({
                         </Button>
                     </Grid>
                     <Grid container justifyContent="center" alignItems="center" item xs={4}>
-                        <Link to="/buy" state={{from: firstClassP, passNum: 4}}>
+                        <Link to="/buy" state={{
+                            flight_id: flightId,
+                            from: origin,
+                            to: destination,
+                            duration_min: minute,
+                            duration_hour: hour
+                        }}>
                             <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickF}>
                                 First Class
                                 ${firstClassP}

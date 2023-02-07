@@ -13,9 +13,7 @@ function Home() {
         <>
             <DrawerAppBar/>
             <div maxWidth="sm" className=" rmdp-rtl">
-
                     <Ticket/>
-
             </div>
             <ButtonBases/>
             {/*<Test/>*/}

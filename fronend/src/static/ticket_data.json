@@ -1,0 +1,21 @@
+{
+  "tickets": [
+    {
+      "from": "THR",
+      "to": "ALL",
+      "class_name": "business",
+      "passNum": "3",
+      "return_status": "around",
+      "leftDate": {
+        "returnDay": 6,
+        "returnMonth": "بهمن",
+        "returnYear": 1401
+      },
+      "retDate": {
+        "returnDay": 1,
+        "returnMonth": "بهمن",
+        "returnYear": 1401
+      }
+    }
+  ]
+}

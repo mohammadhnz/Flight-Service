@@ -21,7 +21,7 @@ function App() {
                 <Route path="/sign-in" element={<SignIn/>}/>
                 <Route path="/about" element={<About/>}/>
                 <Route path="/sign-up" element={<SignUp/>}/>
-                <Route path="/flights" element={<FlightsList/>}/>
+                <Route path="/flightlist" element={<FlightsList/>}/>
                 <Route path="/admin" element={<AdminPanel/>}/>
                 <Route exact path="/buy" element={<BuyTicket/>}/>
                 <Route path="/buy/:from" element={<BuyTicket/>}/>

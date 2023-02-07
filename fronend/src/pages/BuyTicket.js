@@ -1,17 +1,12 @@
-import DrawerAppBar from "../component/pageElements/DrawerAppBar";
 import {useLocation, useParams} from 'react-router-dom'
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import React, {useEffect} from 'react'
 import {yupResolver} from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import {useForm, useFieldArray} from 'react-hook-form'
 import Grid from "@mui/material/Grid";
-import Ticket from "../component/forms/Ticket";
 
 function BuyTicket() {
     const location = useLocation()

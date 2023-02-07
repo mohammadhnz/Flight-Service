@@ -4,9 +4,9 @@ import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 import Button from '@material-ui/core/Button';
 import {Autocomplete, FormControlLabel, IconButton, Radio, RadioGroup, TextField} from "@mui/material";
-import countryNames from "../../static/countries.json";
+// import countryNames from "../../static/countries.json";
 import React, {useState, useEffect} from 'react';
-import flight_api from '../../api/flights'
+// import flight_api from '../../api/flights'
 import axios from "axios";
 
 
@@ -23,10 +23,18 @@ function Ticket() {
 
     const getSourceAndDestinationCountries = async () => {
         try {
-            const response = await flight_api.get('/flights')
+            const response = await axios({
+                method: 'get',
+                url: 'http://localhost:8080/flights',
+                headers: {
+                    'Content-Type': 'application/json;charset=UTF-8',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            })
             setOptions(response.data)
             console.log(response.data)
-        } catch (err) {
+        } catch
+            (err) {
             console.log(err.response.data)
         }
     }
@@ -84,6 +92,7 @@ function Ticket() {
             "returnYear": data.leftDate.year
 
         }
+
         const fromId = data.from.split(" ").at(-1)
         const toId = data.to.split(" ").at(-1)
         formData.append("to", toId)
@@ -96,7 +105,13 @@ function Ticket() {
         for (const value of formData.values()) {
             console.log(value);
         }
-        axios.post(`http://localhost:8888/tickets`, JSON.stringify(Object.fromEntries(formData)))
+        let object = {};
+        formData.forEach(function (value, key) {
+            object[key] = value;
+        });
+        let json = JSON.stringify(object);
+        console.log(json)
+        axios.post(`http://localhost:8888/tickets`, object)
             .then(res => {
                 console.log(res);
                 console.log(res.data);
@@ -129,10 +144,13 @@ function Ticket() {
                     />
                 </label>
 
-                <RadioGroup row aria-label="way" name="return_status" value={ratioValStatus} onChange={handleRaitoStatusChange}>
-                    <FormControlLabel value="around" control={<Radio id="field-around" {...register("return_status")}/>}
+                <RadioGroup row aria-label="way" name="return_status" value={ratioValStatus}
+                            onChange={handleRaitoStatusChange}>
+                    <FormControlLabel value="around"
+                                      control={<Radio id="field-around" {...register("return_status")}/>}
                                       label="رفت و برگشت"/>
-                    <FormControlLabel value="oneway" control={<Radio id="field-oneway" {...register("return_status")}/>}
+                    <FormControlLabel value="oneway"
+                                      control={<Radio id="field-oneway" {...register("return_status")}/>}
                                       label="یک طرفه"/>
                 </RadioGroup>
 
@@ -198,17 +216,21 @@ function Ticket() {
                     <label htmlFor="passNum">تعداد مسافران</label>
                     <div style={{display: 'inline-block'}}>
                         <IconButton aria-label="plus" size="large" onClick={upPassNum}>+</IconButton>
-                        <input style={{width: '25ch',}} variant="standard" {...register("passNum", {required: true})}
+                        <input style={{width: '25ch',}}
+                               variant="standard" {...register("passNum", {required: true})}
                                value={passNum}
                                onChange={handlePasNumChange}/>
                         <IconButton aria-label="plus" size="large" onClick={downPassNum}>-</IconButton>
                     </div>
                 </div>
                 <br/>
-                <RadioGroup row aria-label="classNames" name="class_name" value={ratioVal} onChange={handleRatioChange}>
-                    <FormControlLabel value="buisiness" control={<Radio id="field-around" {...register("class_name")}/>}
+                <RadioGroup row aria-label="classNames" name="class_name" value={ratioVal}
+                            onChange={handleRatioChange}>
+                    <FormControlLabel value="buisiness"
+                                      control={<Radio id="field-around" {...register("class_name")}/>}
                                       label="بیزینس"/>
-                    <FormControlLabel value="economy" control={<Radio id="field-oneway" {...register("class_name")}/>}
+                    <FormControlLabel value="economy"
+                                      control={<Radio id="field-oneway" {...register("class_name")}/>}
                                       label="اکونومی"/>
                     <FormControlLabel value="firstClass"
                                       control={<Radio id="field-oneway" {...register("class_name")}/>}

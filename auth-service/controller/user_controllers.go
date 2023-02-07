@@ -5,7 +5,10 @@ import (
 	"awesomeProject/middleware"
 	"awesomeProject/models"
 	"awesomeProject/repository"
+	"awesomeProject/utils"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"net/http"
 	"time"
 )
@@ -45,7 +48,7 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := GenerateToken(user)
+	accessTokenString, refreshTokenString, err := utils.GetAuthTokens(user)
 
 	if err != nil {
 		ReturnError(c, http.StatusBadRequest, "failed to create token")
@@ -53,13 +56,27 @@ func SignIn(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
+	c.SetCookie("AuthorizationAccess", accessTokenString, 3600, "", "", false, true)
+	c.SetCookie("AuthorizationRefresh", refreshTokenString, 12*3600, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"Yoo": "Yooo"})
 }
 
 func SignOut(c *gin.Context) {
-	claims, user := middleware.DecodeJwtToken(c)
+	claims, user := middleware.ExtractAndDecodeJWTToken(c)
 	token, _ := c.Cookie("Authorization")
+	err := SignOutAndUpdateTokens(claims, user, token)
+	if err != nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": "Failed to create",
+		})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{
+		"ok": "Logged out",
+	})
+
+}
+func SignOutAndUpdateTokens(claims jwt.MapClaims, user models.User, token string) error {
 	if expiration_time, ok := claims["exp"].(float64); ok {
 		unauthorizedToken := models.UnauthorizedToken{
 			User_id:    user.User_id,
@@ -68,16 +85,11 @@ func SignOut(c *gin.Context) {
 		}
 		result := config.DB.Create(&unauthorizedToken)
 		if result.Error != nil {
-			c.JSON(http.StatusConflict, gin.H{
-				"error": "Failed to create",
-			})
-			return
+			return errors.New("")
 		}
-		c.JSON(http.StatusCreated, gin.H{
-			"ok": "Logged out",
-		})
+		return nil
 	}
-
+	return errors.New("")
 }
 
 func UserInfo(c *gin.Context) {
@@ -89,8 +101,9 @@ func UserInfo(c *gin.Context) {
 }
 
 func All(c *gin.Context) {
-	user, _ := c.Get("user")
+	var users []models.User
+	config.DB.Find(&users)
 	c.JSON(http.StatusOK, gin.H{
-		"object": user,
+		"object": users,
 	})
 }

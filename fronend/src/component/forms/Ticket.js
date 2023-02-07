@@ -3,11 +3,20 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 import Button from '@material-ui/core/Button';
+import {
+    BrowserRouter,
+    Route,
+    Routes,
+    Link,
+} from "react-router-dom";
 import {Autocomplete, FormControlLabel, IconButton, Radio, RadioGroup, TextField} from "@mui/material";
 // import countryNames from "../../static/countries.json";
 import React, {useState, useEffect} from 'react';
 // import flight_api from '../../api/flights'
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import SignUp from "../../pages/SignUp";
+import FlightsList from "../../pages/FlightsList";
 
 
 function Ticket() {
@@ -18,6 +27,7 @@ function Ticket() {
     const [ratioValStatus, setRatioValStatus] = useState('around');
     const [passNum, setPassNum] = useState(0);
     const [options, setOptions] = useState([])
+    const navigate = useNavigate();
 
     // const options = countryNames.flights;
 
@@ -75,6 +85,7 @@ function Ticket() {
         setRatioValStatus(event.target.value)
     }
 
+    // function onSubmitButton(data, {retDate, leftDate}) {
     function onSubmitButton(data, {retDate, leftDate}) {
         setLeftDate(leftDate);
         setReturnDate(retDate);
@@ -118,9 +129,24 @@ function Ticket() {
             })
     }
 
+    function isLoggedIn() {
+        // In real life this function is calling a REST endpoint and awaiting the result
+        return true;
+    }
+
+    const PrivateRoute = (data, {retDate, leftDate}) => {
+
+        if (isLoggedIn()) {
+            onSubmitButton(data, {retDate, leftDate})
+            navigate("/flightlist");
+        } else {
+            return <SignUp/>;
+        }
+    };
+
     return (
         <>
-            <form className="data-form classes.root" onSubmit={handleSubmit(onSubmitButton)}>
+            <form className="data-form classes.root" onSubmit={handleSubmit(PrivateRoute)}>
                 <label htmlFor="from-field">
                     از
                     <Autocomplete

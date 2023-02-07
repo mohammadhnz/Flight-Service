@@ -77,18 +77,20 @@ export default function InteractiveCard({
                           alignItems="center"
                           item xs={4}
                     >
-                        <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickE}>
-                            Economy
-                            <br/>
-                            ${economyP}
-                        </Button>
-                    </Grid>
-                    <Grid container justifyContent="center" alignItems="center" item xs={4}>
-                        <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickB}>
-                            Business
-                            <br/>
-                            ${bussinessP}
-                        </Button>
+                        <Link to="/buy" state={{
+                            flight_id: flightId,
+                            from: origin,
+                            to: destination,
+                            duration_min: minute,
+                            duration_hour: hour,
+                            class_name: "economy"
+                        }}>
+                            <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickE}>
+                                Economy
+                                <br/>
+                                ${economyP}
+                            </Button>
+                        </Link>
                     </Grid>
                     <Grid container justifyContent="center" alignItems="center" item xs={4}>
                         <Link to="/buy" state={{
@@ -96,7 +98,24 @@ export default function InteractiveCard({
                             from: origin,
                             to: destination,
                             duration_min: minute,
-                            duration_hour: hour
+                            duration_hour: hour,
+                            class_name: "business"
+                        }}>
+                            <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickB}>
+                                Business
+                                <br/>
+                                ${bussinessP}
+                            </Button>
+                        </Link>
+                    </Grid>
+                    <Grid container justifyContent="center" alignItems="center" item xs={4}>
+                        <Link to="/buy" state={{
+                            flight_id: flightId,
+                            from: origin,
+                            to: destination,
+                            duration_min: minute,
+                            duration_hour: hour,
+                            class_name: "first_class"
                         }}>
                             <Button variant="outlined" size="large" className="btn btn-primary" onClick={handleClickF}>
                                 First Class

@@ -10,7 +10,7 @@ import Grid from "@mui/material/Grid";
 
 function BuyTicket() {
     const location = useLocation()
-    const {from, to, flight_id, duration_min, duration_hour} = location.state
+    const {from, to, flight_id, duration_min, duration_hour, class_name} = location.state
 
     const JsSchema = Yup.object().shape({
         FavFood: Yup.string().required('Value is mendatory!'),
@@ -66,15 +66,18 @@ function BuyTicket() {
     }
 
     const card = (
-            <CardContent>
-                <h2>اطلاعات مسافرین</h2>
-                <Typography sx={{fontSize: 14}} color="text.secondary" gutterBottom>
-                    {duration_hour} : {duration_min}
-                </Typography>
-                <Typography variant="h5" component="div">
-                    از {from} به {to}
-                </Typography>
-            </CardContent>
+        <CardContent>
+            <h2>اطلاعات مسافرین</h2>
+            <Typography variant="h5" component="div">
+                از {from} به {to}
+            </Typography>
+            <Typography variant="body2">
+                صندلی شما در بخش  {class_name} است
+            </Typography>
+            <Typography sx={{fontSize: 14}} color="text.secondary" gutterBottom>
+                مدت زمان سفر{duration_min} : {duration_hour}
+            </Typography>
+        </CardContent>
     );
     return (
         <div className=" rmdp-rtl">

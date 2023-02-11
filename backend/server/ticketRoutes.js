@@ -67,6 +67,8 @@ router.post("/ticket/buy", authHandler, (req, res) => {
 });
 
 router.get("/payment/callback/:code/:status", (req, res) => {
+  validators.validateStringLength(req.params.code, 'code', 30, 60);
+  validators.validateNumberRange(req.params.status, 'status', 1, 6);
   ticket_grpc.parchase({
     tracking_code: req.params.code,
     status: req.params.status,

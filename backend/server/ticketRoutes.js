@@ -4,6 +4,7 @@ const router = express.Router();
 const path = require('path');
 const { ticket_grpc } = require("./grpc_clients");
 const authHandler = require("./authHandler");
+const validators = require("./validators");
 
 router.get("/news/", (req, res) => {
   ticket_grpc.getNews({}, (error, response) => {
@@ -19,6 +20,7 @@ router.get("/news/", (req, res) => {
 });
 
 router.get("/flights/", (req, res) => {
+  validators.validateSearchParams(req.query);
   ticket_grpc.searchFlights(req.query, (error, response) => {
     if (!error) {
       const { list } = response;
@@ -33,6 +35,7 @@ router.get("/flights/", (req, res) => {
 
 
 router.get("/suggest_origin_destination/", (req, res) => {
+  validators.validateStringLength(req.query.name, 'name', 1, 30);
   ticket_grpc.suggestOriginDestination(req.query, (error, response) => {
     if (!error) {
       const { list } = response;
@@ -46,6 +49,7 @@ router.get("/suggest_origin_destination/", (req, res) => {
 });
 
 router.post("/ticket/buy", authHandler, (req, res) => {
+  validators.validateCreateTicketRequest(req.body);
   ticket_grpc.createTicket({
     user_id: req.user.id,
     flight_id: req.body.flight_id,

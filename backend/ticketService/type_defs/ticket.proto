@@ -49,7 +49,6 @@ message SearchParams {
     uint64 departure_time = 3;
     uint64 return_time = 4;
     uint32 number_of_passengers = 5;
-    uint64 class_name = 6;
 }
 
 message Name {

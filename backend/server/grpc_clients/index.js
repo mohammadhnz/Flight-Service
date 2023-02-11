@@ -9,13 +9,13 @@ const ticketDefinition = protoLoader.loadSync(TICKET_PATH, options);
 const authDefinition = protoLoader.loadSync(AUTH_PATH, options);
 
 const ticketProto = grpc.loadPackageDefinition(ticketDefinition);
-const authProto = grpc.loadPackageDefinition(authDefinition);
+const authProto = grpc.loadPackageDefinition(authDefinition).authorization;
 
 const TicketService = ticketProto.TicketService;
-const AuthService = authProto.AuthService;
+const AuthService = authProto.Authentication;
 
 const ticket_grpc = new TicketService('ticket:50050', grpc.credentials.createInsecure());
-const auth_grpc = null; // new AuthService('auth:50051', grpc.credentials.createInsecure());
+const auth_grpc = new AuthService('127.0.0.1:50052', grpc.credentials.createInsecure() );
 
 
 module.exports = {

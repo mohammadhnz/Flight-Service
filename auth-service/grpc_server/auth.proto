@@ -1,7 +1,14 @@
 syntax = "proto3";
-
-
 package authorization;
+
+service Authentication {
+  rpc Signup(SignupData) returns (SignupResponse) {}
+  rpc SignIn(SignInData) returns (FreshTokensResponse) {}
+  rpc SignOut(TokenData) returns (SignOutResponse) {}
+  rpc UserInfo(TokenData) returns (UserInfoResponse) {}
+  rpc Refresh(TokenData) returns (FreshTokensResponse) {}
+}
+
 
 message SignupData {
   enum GENDER_TYPES {
@@ -34,10 +41,11 @@ message SignInData {
   string password = 3;
 }
 
-message SignInResponse {
+message FreshTokensResponse {
   enum SINGIN_STATUS {
     WRONG_EMAIL_OR_PHONE_NUMBER_OR_PASSWORD = 0;
     OK_200 = 1;
+    FAILED_TO_CREATE_NEW_TOKEN = 2;
   }
   string accessToken = 3;
   string refreshToken = 4;
@@ -45,7 +53,7 @@ message SignInResponse {
 
 }
 
-message SignOutData {
+message TokenData {
   string accessToken = 1;
   string refreshToken = 2;
 }
@@ -59,10 +67,6 @@ message SignOutResponse {
   SIGN_OUT_STATUS status = 4;
 }
 
-message UserInfoData {
-  string accessToken = 1;
-  string refreshToken = 2;
-}
 
 message UserInfoResponse {
   enum USERINFO_STATUS {
@@ -75,15 +79,10 @@ message UserInfoResponse {
 }
 
 message UserData {
+  int64 id = 1;
   string email = 2;
   string phone_number = 3;
   string gender = 4;
   string first_name = 5;
   string last_name = 6;
-}
-service Authentication {
-  rpc Signup(SignupData) returns (SignupResponse) {}
-  rpc SignIn(SignInData) returns (SignInResponse) {}
-  rpc SignOut(SignOutData) returns (SignOutResponse) {}
-  rpc UserInfo(UserInfoData) returns (UserInfoResponse) {}
 }

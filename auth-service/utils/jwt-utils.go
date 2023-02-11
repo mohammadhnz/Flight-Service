@@ -27,7 +27,7 @@ func GenerateOAuthToken(user models.User, secret string, expireTime time.Duratio
 	return tokenString, err
 }
 
-func ExtractJwtToken(tokenString string) (jwt.MapClaims, models.User, error) {
+func ExtractJwtToken(tokenString string, secret string) (jwt.MapClaims, models.User, error) {
 	var claims jwt.MapClaims
 
 	mapClaims, m, err := checkTokenIsNotUnAuthorized(tokenString)
@@ -39,7 +39,7 @@ func ExtractJwtToken(tokenString string) (jwt.MapClaims, models.User, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
+		return []byte(secret), nil
 	})
 
 	if cl, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {

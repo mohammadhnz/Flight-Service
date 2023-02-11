@@ -1,22 +1,88 @@
 syntax = "proto3";
+package authorization;
 
-service AuthService {
-    rpc authenticate(AuthRequest) returns (AuthResponse) {}
+service Authentication {
+  rpc Signup(SignupData) returns (SignupResponse) {}
+  rpc SignIn(SignInData) returns (FreshTokensResponse) {}
+  rpc SignOut(TokenData) returns (SignOutResponse) {}
+  rpc UserInfo(TokenData) returns (UserInfoResponse) {}
+  rpc Refresh(TokenData) returns (FreshTokensResponse) {}
 }
 
-message AuthRequest {
-    string path = 1;
-    repeated string headers = 2;
+
+message SignupData {
+  enum GENDER_TYPES {
+    MEN = 0;
+    WOMEN = 1;
+    SO_SO = 2;
+  }
+  string email = 3;
+  string phone_number = 4;
+  GENDER_TYPES gender = 5;
+  string first_name = 6;
+  string last_name = 7;
+  string password = 8;
 }
 
-message AuthResponse {
-    bool success = 1;
-    uint32 code = 2;
-    User user = 3;
+message SignupResponse {
+  enum SIGNUP_STATUS {
+    DUPLICATE_EMAIL_OR_PHONE_NUMBER_403 = 0;
+    FAILED_TO_HASH_PASSWORD_400 = 1;
+    FAILED_TO_CREATE_USER_400 = 2;
+    OK_201 = 3;
+  }
+  SIGNUP_STATUS status = 7;
+  int64 user_id = 8;
 }
 
-message User {
-    uint32 id = 1;
-    string name = 2;
-    string family = 3;
+message SignInData {
+  string email = 1;
+  string phone_number = 2;
+  string password = 3;
+}
+
+message FreshTokensResponse {
+  enum SINGIN_STATUS {
+    WRONG_EMAIL_OR_PHONE_NUMBER_OR_PASSWORD = 0;
+    OK_200 = 1;
+    FAILED_TO_CREATE_NEW_TOKEN = 2;
+  }
+  string accessToken = 3;
+  string refreshToken = 4;
+  SINGIN_STATUS status = 7;
+
+}
+
+message TokenData {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message SignOutResponse {
+  enum SIGN_OUT_STATUS {
+    AUTHORIZATION_ERROR_401 = 0;
+    FAILED_TO_SIGN_OUT = 1;
+    OK_201 = 2;
+  }
+  SIGN_OUT_STATUS status = 4;
+}
+
+
+message UserInfoResponse {
+  enum USERINFO_STATUS {
+    AUTHORIZATION_ERROR_401 = 0;
+    FAILED_TO_SIGN_OUT = 1;
+    OK_200 = 2;
+  }
+  UserData user = 2;
+  USERINFO_STATUS status = 9;
+}
+
+message UserData {
+  int64 id = 1;
+  string email = 2;
+  string phone_number = 3;
+  string gender = 4;
+  string first_name = 5;
+  string last_name = 6;
 }

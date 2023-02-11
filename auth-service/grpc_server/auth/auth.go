@@ -1,11 +1,15 @@
 package authorization
 
 import (
+	"awesomeProject/config"
 	"awesomeProject/controller"
 	"awesomeProject/repository"
 	"awesomeProject/utils"
+	"fmt"
 	"golang.org/x/net/context"
 	"log"
+	"os"
+	"time"
 )
 
 type Server struct {
@@ -34,7 +38,7 @@ func (s *Server) Signup(ctx context.Context, signupData *SignupData) (*SignupRes
 	}, nil
 }
 
-func (s *Server) SignIn(ctx context.Context, signInData *SignInData) (*SignInResponse, error) {
+func (s *Server) SignIn(ctx context.Context, signInData *SignInData) (*FreshTokensResponse, error) {
 	log.Printf(
 		"received signup request from client: email: %s phone_number: %s email: %s",
 		signInData.Email, signInData.PhoneNumber, signInData.Password,
@@ -48,8 +52,8 @@ func (s *Server) SignIn(ctx context.Context, signInData *SignInData) (*SignInRes
 	user, err := repository.GetUser(buser)
 
 	if err != nil {
-		return &SignInResponse{
-			Status:       SignInResponse_WRONG_EMAIL_OR_PHONE_NUMBER_OR_PASSWORD,
+		return &FreshTokensResponse{
+			Status:       FreshTokensResponse_WRONG_EMAIL_OR_PHONE_NUMBER_OR_PASSWORD,
 			AccessToken:  "",
 			RefreshToken: "",
 		}, nil
@@ -57,55 +61,102 @@ func (s *Server) SignIn(ctx context.Context, signInData *SignInData) (*SignInRes
 	accessToken, refreshToken, err := utils.GetAuthTokens(user)
 
 	if err != nil {
-		return &SignInResponse{
-			Status:       SignInResponse_WRONG_EMAIL_OR_PHONE_NUMBER_OR_PASSWORD,
+		return &FreshTokensResponse{
+			Status:       FreshTokensResponse_WRONG_EMAIL_OR_PHONE_NUMBER_OR_PASSWORD,
 			AccessToken:  "",
 			RefreshToken: "",
 		}, nil
 	}
 
-	return &SignInResponse{
-		Status:       SignInResponse_OK_200,
+	return &FreshTokensResponse{
+		Status:       FreshTokensResponse_OK_200,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
 }
 
-func (s *Server) SignOut(ctx context.Context, signOutData *SignOutData) (*SignOutResponse, error) {
+func (s *Server) SignOut(ctx context.Context, tokenData *TokenData) (*SignOutResponse, error) {
 	log.Printf(
 		"received signup request from client: access_token: %s refresh_token: %s",
-		signOutData.AccessToken, signOutData.RefreshToken,
+		tokenData.AccessToken, tokenData.RefreshToken,
 	)
-	claims, user, err := utils.ExtractJwtToken(signOutData.AccessToken)
+	err, response, err2, done := checkIfTokenHasBeenExpired(tokenData)
+	if done {
+		return response, err2
+	}
+	claims, user, err := utils.ExtractJwtToken(tokenData.AccessToken, os.Getenv("ACCESS_SECRET"))
 	if err != nil {
 		return &SignOutResponse{Status: SignOutResponse_AUTHORIZATION_ERROR_401}, nil
 	}
-	err = controller.SignOutAndUpdateTokens(claims, user, signOutData.AccessToken)
+	err = controller.SignOutAndUpdateTokens(claims, user, tokenData.AccessToken)
 	if err != nil {
 		return &SignOutResponse{Status: SignOutResponse_FAILED_TO_SIGN_OUT}, nil
 	}
+	config.RedisClient.Set(tokenData.AccessToken, "Some thing", 24*time.Hour)
 	return &SignOutResponse{
 		Status: SignOutResponse_OK_201,
 	}, nil
 }
 
-func (s *Server) UserInfo(ctx context.Context, userInfoData *UserInfoData) (*UserInfoResponse, error) {
+func checkIfTokenHasBeenExpired(tokenData *TokenData) (error, *SignOutResponse, error, bool) {
+	data, err := config.RedisClient.Get(tokenData.AccessToken).Result()
+	if data != "" {
+		return nil, &SignOutResponse{
+			Status: SignOutResponse_OK_201,
+		}, nil, true
+
+	}
+	return err, nil, nil, false
+}
+
+func (s *Server) UserInfo(ctx context.Context, tokenData *TokenData) (*UserInfoResponse, error) {
 	log.Printf(
 		"received signup request from client: access_token: %s refresh_token: %s",
-		userInfoData.AccessToken, userInfoData.RefreshToken,
+		tokenData.AccessToken, tokenData.RefreshToken,
 	)
-	_, user, err := utils.ExtractJwtToken(userInfoData.AccessToken)
+	_, user, err := utils.ExtractJwtToken(tokenData.AccessToken, os.Getenv("ACCESS_SECRET"))
 	if err != nil {
 		return &UserInfoResponse{Status: UserInfoResponse_AUTHORIZATION_ERROR_401}, nil
 	}
 	return &UserInfoResponse{
 		Status: UserInfoResponse_OK_200,
 		User: &UserData{
+			Id:          user.User_id,
 			FirstName:   user.First_name,
 			LastName:    user.Last_name,
 			PhoneNumber: user.Phone_number,
 			Email:       user.Email,
 			Gender:      user.Gender,
 		},
+	}, nil
+}
+func (s *Server) Refresh(ctx context.Context, tokenData *TokenData) (*FreshTokensResponse, error) {
+	log.Printf(
+		"received signup request from client: access_token: %s refresh_token: %s",
+		tokenData.AccessToken, tokenData.RefreshToken,
+	)
+	_, user, err := utils.ExtractJwtToken(tokenData.RefreshToken, os.Getenv("REFRESH_SECRET"))
+	if err != nil {
+		fmt.Println("Err 1")
+		return &FreshTokensResponse{
+			Status:       FreshTokensResponse_FAILED_TO_CREATE_NEW_TOKEN,
+			AccessToken:  tokenData.AccessToken,
+			RefreshToken: tokenData.RefreshToken,
+		}, nil
+	}
+	accessToken, refreshToken, err := utils.GetAuthTokens(user)
+	if err != nil {
+		fmt.Println("Err 2")
+		return &FreshTokensResponse{
+			Status:       FreshTokensResponse_FAILED_TO_CREATE_NEW_TOKEN,
+			AccessToken:  tokenData.AccessToken,
+			RefreshToken: tokenData.RefreshToken,
+		}, nil
+	}
+	fmt.Println("Err 3")
+	return &FreshTokensResponse{
+		Status:       FreshTokensResponse_OK_200,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 }

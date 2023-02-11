@@ -1,20 +1,21 @@
-// const { auth_grpc } = require("./grpc_clients");
+const {auth_grpc} = require("./grpc_clients");
 
-const auth_grpc = {
-  authenticate: (data, callback) => {
-    //return callback(null, {success: false, code: 403});
-    // return callback("error");
-    return callback(null, {success: true, user: {id: 34}});
-  },
-}
 
 module.exports = (req, res, next) => {
-  auth_grpc.authenticate({path: req.path, headers: req.headers}, (error, response) => {
-    if (!error && response.success) {
-      req.user = response.user;
-      next();
-    } else {
-      return res.sendStatus(error ? 500: response.code);
+    if (!req.cookies.tokens) {
+        return res.status(401).json({ok: false, data: req.cookies})
     }
-  });
+    let tokens = JSON.parse(req.cookies.tokens)
+    auth_grpc.UserInfo({
+        accessToken: tokens['accessToken'],
+        refreshToken: tokens['refreshToken'],
+    }, (error, response) => {
+        if (!error) {
+            req.user = response.user;
+            next();
+        } else {
+            console.error(error);
+            return res.sendStatus(401);
+        }
+    });
 }

@@ -5,7 +5,9 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.8.2
 	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/joho/godotenv v1.4.0
+	github.com/redis/go-redis v6.15.9+incompatible
 	golang.org/x/crypto v0.5.0
 	google.golang.org/grpc v1.52.3
 	gorm.io/driver/postgres v1.4.6
@@ -13,7 +15,9 @@ require (
 )
 
 require (
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/go-redis/redis v6.15.9+incompatible // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.26.0 // indirect
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
 )
 

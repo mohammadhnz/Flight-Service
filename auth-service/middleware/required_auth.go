@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"net/http"
+	"os"
 )
 
 func RequiredAuth(c *gin.Context) {
@@ -18,7 +19,7 @@ func RequiredAuth(c *gin.Context) {
 func ExtractAndDecodeJWTToken(c *gin.Context) (jwt.MapClaims, models.User) {
 	tokenString, err := c.Cookie("AuthorizationAccess")
 
-	claims, user, err := utils.ExtractJwtToken(tokenString)
+	claims, user, err := utils.ExtractJwtToken(tokenString, os.Getenv("ACCESS_SECRET"))
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}

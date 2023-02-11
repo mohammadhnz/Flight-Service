@@ -9,7 +9,12 @@ module.exports = {
     },
  
     validateStringLength(str, fieldName, l, r) {
-        assert(str.length>=l && str.length<=r, "value "+ fieldName + "has invalid length");
+        this.validateExistance(str, fieldName);
+        assert(str.length>=l && str.length<=r, "value "+ fieldName + " has invalid length");
+    },
+
+    validateExistance(x, fieldName) {
+        assert(x!==undefined && x!=null, "value " + fieldName + " is null");
     },
  
     validateNumberRange(x, fieldName, l, r) {
@@ -17,11 +22,12 @@ module.exports = {
     },
 
     validateIdentifier(x, fieldName) {
+        console.log(x, fieldName);
         assert(x>=1 && x<=1000000000, "invalid identifier "+fieldName);
     },
  
     validateStringOneOf(x, fieldName, alowedList) {
-        assert(alowedList.contains(x), "invalid "+fieldName+": value should be one of {"+alowedList+"}");
+        assert(alowedList.includes(x), "invalid "+fieldName+": value should be one of {"+alowedList+"}");
     },
 
     validateSearchParams(searchParams) {
@@ -43,23 +49,24 @@ module.exports = {
     },
 
     validatePassengerData(passenger) {
-        validators.validateStringLength(passenger.name, 'passenger name', 2, 30);
-        validators.validateStringLength(passenger.name, 'passenger family', 2, 30);
-        validators.validateStringLength(passenger.name, 'passenger passport', 2, 30);
+        this.validateStringLength(passenger.name, 'passenger name', 2, 30);
+        this.validateStringLength(passenger.name, 'passenger family', 2, 30);
+        this.validateStringLength(passenger.name, 'passenger passport', 2, 30);
     },
 
     validateCreateTicketRequest(body) {
-        validators.validateIdentifier(req.body.flight_id, 'flight_id');
-        validators.validateStringOneOf(req.body.class_name, ['First Class', 'Economy', 'Business']);
-        assert(Array.isArray(body.passenger), 'passengers field must be an array!');
-        assert(body.passenger.length>=1 && body.passenger.length<30, 'passengers field has illigal length');
-        body.passenger.forEach(passenger => this.validatePassengerData(passenger));
+        this.validateExistance(body.flight_id, 'flight_id');
+        this.validateStringLength(body.flight_id, 'flight_id', 2, 10);
+        this.validateStringOneOf(body.class_name, 'class_name', ['First Class', 'Economy', 'Business']);
+        assert(Array.isArray(body.passengers), 'passengers field must be an array!');
+        assert(body.passengers.length>=1 && body.passengers.length<30, 'passengers field has illigal length');
+        body.passengers.forEach(passenger => this.validatePassengerData(passenger));
     },
 
     validatorMiddleware(err, req, res, next) {
         if (err instanceof AssertionError) {
             return res.status(400).json({ ok: false, error: err.message});
         }
-        next();
+        return res.status(500).json({ ok: false, error: err.message});
     }
 };

@@ -91,11 +91,11 @@ services:
       - ticket
       - auth
   reverse-proxy:
+    restart: always
     build:
-      context: ./server
-      dockerfile: Dockerfile
+        context: ./reverse-proxy
     ports:
-      - "8081:8081"
+        - "90:80"
     depends_on:
       - postgres
       - ticket

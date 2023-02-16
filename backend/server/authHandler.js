@@ -2,6 +2,7 @@ const {auth_grpc} = require("./grpc_clients");
 
 
 module.exports = (req, res, next) => {
+    console.log("Looping in auth handler");
     if (!req.cookies.tokens) {
         return res.status(401).json({ok: false, data: req.cookies})
     }

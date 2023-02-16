@@ -20,7 +20,9 @@ router.get("/news/", (req, res) => {
 });
 
 router.get("/flights/", (req, res) => {
+  console.log("Getting Flights");
   validators.validateSearchParams(req.query);
+  console.log("Validated Flights fields");
   ticket_grpc.searchFlights(req.query, (error, response) => {
     if (!error) {
       const { list } = response;

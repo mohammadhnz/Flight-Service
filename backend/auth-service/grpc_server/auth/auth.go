@@ -106,6 +106,9 @@ func checkIfTokenHasBeenExpired(tokenData *TokenData) (error, *SignOutResponse, 
 		}, nil, true
 
 	}
+	if err != nil {
+        checkTokenIsNotUnAuthorized
+	}
 	return err, nil, nil, false
 }
 

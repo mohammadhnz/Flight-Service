@@ -6,6 +6,12 @@ services:
     expose:
       - "6379"
 
+  authRedis:
+    image: redis:6.2-alpine
+    command: --port 6380
+    expose:
+      - "6380"
+
   postgres:
     build:
       context: ./postgres
@@ -18,7 +24,33 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - ./postgres/csvs:/var/lib/postgresql/csvs
+      - ./ticket-data:/var/lib/postgresql/data
 
+  authdb:
+    image: postgres
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./auth-service/sql/auth.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./auth-data:/var/lib/postgresql/data
+  auth:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    expose:
+      - "50052"
+    ports:
+      - "50052:50052"
+    depends_on:
+      - authdb
+      - authRedis
+    links:
+      - authdb
+      - authRedis
   bank:
     build:
       context: ./bankService
@@ -52,7 +84,25 @@ services:
       - postgres
       - ticket
       - bank
+      - auth
     links:
       - postgres
       - bank
       - ticket
+      - auth
+  reverse-proxy:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - ticket
+      - bank
+      - auth
+    links:
+      - postgres
+      - bank
+      - ticket
+      - auth

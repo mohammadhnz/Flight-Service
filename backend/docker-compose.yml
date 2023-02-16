@@ -94,7 +94,7 @@ services:
       context: ./reverse-proxy
       dockerfile: Dockerfile
     ports:
-        - "9000:80"
+        - "90:80"
     depends_on:
       - postgres
       - ticket

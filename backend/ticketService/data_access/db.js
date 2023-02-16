@@ -48,17 +48,30 @@ const Indexes = {
 }
 
 async function removeCache(index, values) {
-    if(values){
-        const queryKey = createKey(index, values);
-        console.log("REMOVING", queryKey);
-        await redisClient.del(queryKey);
-    }else{
-        const keys = await redisClient.keys(index + "_$$$_*");
-        for(const key of keys) {
-            await redisClient.del(key);
+    try {
+        if(values){
+            const queryKey = createKey(index, values);
+            console.log("REMOVING", queryKey);
+            await redisClient.del(queryKey);
+        }else{
+            const keys = await redisClient.keys(index + "_$$$_*");
+            for(const key of keys) {
+                await redisClient.del(key);
+            }
         }
+    } catch (Error) {
+        return;
     }
 }
+
+async function redis_get(index, values) {
+    try {
+        return redisClient.get(queryKey);
+    } catch (Error) {
+        return null;
+    }
+}
+
 
 const functions = {
     update: async ({text, values, dirtyIndexes}) => {

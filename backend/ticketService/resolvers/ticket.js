@@ -104,19 +104,24 @@ function getFullFlightData(request, row) {
 
 const searchFlights = async ({request}, callback) => {
     try {
+        console.log("ticket_service: Getting flights");
         const query = buildQuery(request);
         const { rows } = await db.complexSelect(query);
+        console.log("ticket_service: We have rows");
         if (rows.length !== 0) {
             const result = rows.map(r => getFullFlightData(request, r));
+            console.log("ticket_service: call back 1");
             callback(null, { list: result}); 
         }
         else {
+            console.log("ticket_service: call back 2");
             callback({
                 code: grpc.status.NOT_FOUND,
                 details: "Not Found"
             })
         }
     } catch(e) {
+        console.log("ticket_service: exception");
         console.log(e);
         callback(e);
     }

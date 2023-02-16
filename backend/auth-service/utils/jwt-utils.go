@@ -30,7 +30,7 @@ func GenerateOAuthToken(user models.User, secret string, expireTime time.Duratio
 func ExtractJwtToken(tokenString string, secret string) (jwt.MapClaims, models.User, error) {
 	var claims jwt.MapClaims
 
-	mapClaims, m, err := checkTokenIsNotUnAuthorized(tokenString)
+	mapClaims, m, err := CheckTokenIsNotUnAuthorized(tokenString)
 	if err != nil {
 		return mapClaims, m, err
 	}
@@ -59,7 +59,7 @@ func ExtractJwtToken(tokenString string, secret string) (jwt.MapClaims, models.U
 	return claims, user, nil
 }
 
-func checkTokenIsNotUnAuthorized(tokenString string) (jwt.MapClaims, models.User, error) {
+func CheckTokenIsNotUnAuthorized(tokenString string) (jwt.MapClaims, models.User, error) {
 	var unauthorized_toke models.UnauthorizedToken
 	config.DB.Where("token = ?", tokenString).First(&unauthorized_toke)
 	if unauthorized_toke.User_id != 0 {

@@ -6,6 +6,7 @@ const {ticket_grpc, auth_grpc} = require("./grpc_clients");
 const authHandler = require("./authHandler");
 
 router.post("/signup/", (req, res) => {
+    // console.log(auth_grpc.Signup);
     auth_grpc.Signup({
         email: req.body.email,
         first_name: req.body.first_name,
@@ -25,7 +26,7 @@ router.post("/signup/", (req, res) => {
 });
 
 
-router.get("/signin/", (req, res) => {
+router.post("/signin/", (req, res) => {
     auth_grpc.SignIn({
         email: req.body.email,
         phone_number: req.body.phone_number,
@@ -42,7 +43,7 @@ router.get("/signin/", (req, res) => {
 });
 
 
-router.get("/signout/", (req, res) => {
+router.post("/signout/", (req, res) => {
     if (!req.cookies.tokens) {
         return res.status(500).json({ok: false, data: req.cookies})
     }

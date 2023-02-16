@@ -4,6 +4,7 @@ import (
 	authorization "awesomeProject/grpc_server/auth"
 	"context"
 	"google.golang.org/grpc"
+	"fmt"
 	"log"
 )
 
@@ -30,25 +31,5 @@ func main() {
 	if err != nil {
 		log.Printf("Could not sign up: %s", err)
 	}
-
-	signInData := authorization.SignInData{
-		PhoneNumber: "0933041sdf2310360",
-		Email:       "dfsdfsdfsdfsdf@gmail.com",
-		Password:    "Ali is near 999",
-	}
-
-	res, err := c.SignIn(context.Background(), &signInData)
-	if err != nil {
-		log.Printf("Could not sign up: %s", err)
-	}
-	log.Println(res)
-	userInfoData := authorization.UserInfoData{
-		AccessToken:  string(res.AccessToken),
-		RefreshToken: string(res.RefreshToken),
-	}
-	res1, err1 := c.UserInfo(context.Background(), &userInfoData)
-	if err1 != nil {
-		log.Printf("Could not sign up: %s", err)
-	}
-	log.Println(res1)
+	fmt.Println("Fuck life")
 }

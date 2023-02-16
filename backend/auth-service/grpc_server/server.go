@@ -16,11 +16,11 @@ func init() {
 }
 
 func main() {
-	lis, err := net.Listen("tcp", "localhost:50052")
+	lis, err := net.Listen("tcp", "0.0.0.0:50052")
 	if err != nil {
 		log.Fatal("Error running grpc_server!")
 	}
-
+    fmt.Println("HELLOO BABY")
 	s := authorization.Server{}
 	grpcServer := grpc.NewServer()
 
